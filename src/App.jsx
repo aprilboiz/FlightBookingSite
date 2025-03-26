@@ -5,6 +5,7 @@ import Logo from './components/Logo'
 import MenuList from './components/MenuList'
 import CalenderPlane from './components/CalenderPlane'
 import ListPlane from './components/ListPlane'
+import SaleTicket from './components/SaleTicket'
 
 const { Header, Sider, Content } = Layout
 function App() {
@@ -22,6 +23,7 @@ function App() {
             <Routes>
               <Route path="/calender-plane" element={<CalenderPlane />} />
               <Route path="/list-plane" element={<ListPlane />} />
+              <Route path="/sale-ticket" element={<SaleTicket />} />
             </Routes>
           </Content>
         </Layout >
