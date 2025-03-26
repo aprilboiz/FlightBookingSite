@@ -10,10 +10,12 @@ import {
   InputNumber,
   Button,
   notification,
+  DatePicker,
 } from "antd";
 
 const { Title } = Typography;
 const { Option } = Select;
+import dayjs from "dayjs";
 
 const airports = [
   { value: "HAN", label: "Hà Nội" },
@@ -67,22 +69,18 @@ const data = [
 ];
 
 const CalenderPlane = () => {
-  const [selectedDate, setSelectedDate] = React.useState(
-    new Date().toISOString().split("T")[0]
-  );
+  const [selectedDateTime, setSelectedDateTime] = useState(dayjs())
 
-  const handleDateChange = (e) => {
-    const chosenDate = e.target.value;
-    const today = new Date().toISOString().split("T")[0];
-
-    if (chosenDate < today) {
-        notification.error({
-            message: "Ngày không hợp lệ",
-            description: "Ngày không thể nhỏ hơn ngày hiện tại",
-        });
-      setSelectedDate(today);
-    } else {
-      setSelectedDate(chosenDate);
+  const handleDateTimeChange = (value) => {
+    const now = dayjs()
+    if (value && value.isBefore(now)) {
+      notification.error({
+        message: "Lỗi",
+        description: "Thời gian không hợp lệ",
+      });
+      setSelectedDateTime(now)
+    }else{
+      setSelectedDateTime(value)
     }
   };
   return (
@@ -121,11 +119,12 @@ const CalenderPlane = () => {
 
         <div>
           <Form.Item label="Ngày - Giờ">
-            <Input
-              type="date"
-              value={selectedDate}
-              onChange={handleDateChange}
-              placeholder="Nhập ngày - giờ"
+            <DatePicker
+              showTime
+              format="DD-MM-YYYY HH:mm"
+              onChange={handleDateTimeChange}
+              className="w-full"
+              value={selectedDateTime}
             />
           </Form.Item>
           <Form.Item label="Thời gian bay (phút)">
