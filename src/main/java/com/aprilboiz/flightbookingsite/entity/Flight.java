@@ -20,29 +20,33 @@ public class Flight {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @Column(name = "flight_number", nullable = false)
+    @Column(nullable = false)
     private String flightNumber;
 
-    @Column(name = "base_price", nullable = false)
+    @ManyToOne
+    @JoinColumn(nullable = false, name = "plane_id")
+    private Plane plane;
+
+    @Column(nullable = false)
     private Double basePrice;
 
     @ManyToOne
-    @JoinColumn(name = "departure_airport_id", nullable = false)
+    @JoinColumn(nullable = false, name = "departure_airport_id")
     private Airport departureAirport;
 
     @ManyToOne
-    @JoinColumn(name = "arrival_airport_id", nullable = false)
+    @JoinColumn(nullable = false, name = "arrival_airport_id")
     private Airport arrivalAirport;
 
-    @Column(name = "duration", nullable = false)
+    @Column(nullable = false)
     private Double flightTime;
 
-    @Column(name = "departure_time", nullable = false)
+    @Column(nullable = false)
     private LocalDateTime departureTime;
 
-    @OneToMany(mappedBy = "flight")
-    private List<SeatClass> seatClasses;
+    @OneToMany
+    private List<Seat> seats;
 
-    @OneToMany(mappedBy = "flight")
-    private List<IntermediateStops> intermediateStops;
+    @OneToMany
+    private List<IntermediateStop> intermediateStops;
 }

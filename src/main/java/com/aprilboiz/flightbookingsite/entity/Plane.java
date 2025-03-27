@@ -1,27 +1,25 @@
 package com.aprilboiz.flightbookingsite.entity;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.validator.constraints.Range;
 
-@Table(name = "seat_classes")
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
 @Builder
 @Entity
-public class SeatClass {
+public class Plane {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue
     private Long id;
-
     @Column(nullable = false)
-    private String seatClass;
-
+    private String name;
     @Column(nullable = false)
-    @Range(min = 0)
-    private Double priceMultiplier;
+    private Integer numberOfSeats;
 }

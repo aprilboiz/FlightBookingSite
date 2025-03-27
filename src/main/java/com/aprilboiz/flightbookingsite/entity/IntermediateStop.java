@@ -3,13 +3,13 @@ package com.aprilboiz.flightbookingsite.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
-@Table(name = "intermedia_stops")
+@Table(name = "intermediate_stops")
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
 @Builder
 @Entity
-public class IntermediateStops{
+public class IntermediateStop {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
