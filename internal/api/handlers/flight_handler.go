@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"github.com/aprilboiz/flight-management/internal/models"
 	"github.com/aprilboiz/flight-management/internal/service"
 	"github.com/gin-gonic/gin"
 )
@@ -14,27 +13,27 @@ func NewFlightHandler(flightService service.FlightService) FlightHandler {
 	return &flightHandler{flightService: flightService}
 }
 
-func (f flightHandler) CreateFlight(c *gin.Context) (*models.Flight, error) {
+func (f flightHandler) GetAllFlights(c *gin.Context) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (f flightHandler) GetAllFlights(c *gin.Context) ([]*models.Flight, error) {
+func (f flightHandler) GetFlightByCode(c *gin.Context) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (f flightHandler) GetFlightByCode(c *gin.Context) (*models.Flight, error) {
+func (f flightHandler) CreateFlight(c *gin.Context) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (f flightHandler) UpdateFlight(c *gin.Context) (*models.Flight, error) {
+func (f flightHandler) UpdateFlight(c *gin.Context) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (f flightHandler) DeleteFlight(c *gin.Context) error {
+func (f flightHandler) DeleteFlightByCode(c *gin.Context) {
 	//TODO implement me
 	panic("implement me")
 }

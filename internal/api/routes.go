@@ -17,19 +17,12 @@ func SetupRoutes(router *gin.Engine, h Handlers) {
 	router.Use(middleware.ErrorHandler())
 	v1 := router.Group("/api/v1")
 
-	tests := v1.Group("/test")
-	{
-		tests.GET("/", handlers.TestHandler)
-		tests.POST("/", handlers.TestPostHandler)
-	}
-
 	flightRoutes := v1.Group("/flights")
 	{
-		flightRoutes.POST("", h.FlightHandler.CreateFlight)               // POST /api/flights
-		flightRoutes.GET("", h.FlightHandler.GetAllFlights)               // GET /api/flights
-		flightRoutes.GET("/:code", h.FlightHandler.GetFlightByCode)       // GET /api/flights/{code}
-		flightRoutes.PUT("/:code", h.FlightHandler.UpdateFlight)          // PUT /api/flights/{code}
-		flightRoutes.DELETE("/:code", h.FlightHandler.DeleteFlightByCode) // DELETE /api/flights/{code}
-		// Removed GetFlightByID as GetFlightByCode seems to be the primary identifier used in service
+		flightRoutes.POST("", h.FlightHandler.CreateFlight)
+		flightRoutes.GET("", h.FlightHandler.GetAllFlights)
+		flightRoutes.GET("/:code", h.FlightHandler.GetFlightByCode)
+		flightRoutes.PUT("/:code", h.FlightHandler.UpdateFlight)
+		flightRoutes.DELETE("/:code", h.FlightHandler.DeleteFlightByCode)
 	}
 }
