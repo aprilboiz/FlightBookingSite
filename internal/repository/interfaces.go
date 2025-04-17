@@ -1,0 +1,32 @@
+package repository
+
+import (
+	"github.com/aprilboiz/flight-management/internal/models"
+)
+
+type FlightRepository interface {
+	GetAll() ([]*models.Flight, error)
+	GetByID(id int) (*models.Flight, error)
+	GetByCode(code string) (*models.Flight, error)
+	Create(flight *models.Flight) (*models.Flight, error)
+	Update(flight *models.Flight) (*models.Flight, error)
+	Delete(flight *models.Flight) error
+}
+
+type AirportRepository interface {
+	GetByCode(code string) (*models.Airport, error)
+	GetByCodes(codes []string) (map[string]*models.Airport, error)
+}
+
+type PlaneRepository interface {
+	GetByID(id uint) (*models.Plane, error)
+}
+
+type TicketClassRepository interface {
+	GetByName(name string) (*models.TicketClass, error)
+	GetByNames(names []string) (map[string]*models.TicketClass, error)
+}
+
+type FlightCodeGenerator interface {
+	Generate() (string, error)
+}
