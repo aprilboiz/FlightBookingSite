@@ -3,9 +3,9 @@ import { FireFilled } from '@ant-design/icons'
 
 const Logo = () => {
   return (
-    <div className='flex items-center justify-center text-white p-2.5'>
-        <div className="w-[40px] h-[40px] flex items-center justify-center text-[1.5rem] rounded-[50%] bg-[#1890ff]">
-            <FireFilled />
+    <div className='flex items-center justify-center text-black p-2.5'>
+        <div className=" text-[1.5rem]">
+            <h2 className='font-medium'>RuaAirline</h2>
         </div>
     </div>
   )
