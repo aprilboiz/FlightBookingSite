@@ -1,8 +1,10 @@
 package handlers
 
 import (
+	"github.com/aprilboiz/flight-management/internal/dto"
 	"github.com/aprilboiz/flight-management/internal/service"
 	"github.com/gin-gonic/gin"
+	"net/http"
 )
 
 type flightHandler struct {
@@ -24,8 +26,22 @@ func (f flightHandler) GetFlightByCode(c *gin.Context) {
 }
 
 func (f flightHandler) CreateFlight(c *gin.Context) {
-	//TODO implement me
-	panic("implement me")
+	validatedModel, exists := c.Get("validatedModel")
+	if !exists {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "validated model not found"})
+		return
+	}
+	flightRequest, ok := validatedModel.(*dto.FlightRequest)
+	if !ok {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid validated model"})
+		return
+	}
+	flightResponse, err := f.flightService.Create(flightRequest)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusCreated, flightResponse)
 }
 
 func (f flightHandler) UpdateFlight(c *gin.Context) {

@@ -112,15 +112,15 @@ func migrateDatabase(db *gorm.DB) error {
 		return err
 	}
 	return db.AutoMigrate(
-		&models.Flight{},
 		&models.Plane{},
-		&models.Airport{},
-		&models.FlightTicket{},
-		&models.IntermediateStop{},
-		&models.Seat{},
 		&models.TicketClass{},
-		&models.FlightTicketDetails{},
-		&models.Parameters{},
+		&models.Airport{},
+		&models.Seat{},
+		&models.Flight{},
+		&models.IntermediateStop{},
+		&models.Ticket{},
+		&models.Configuration{},
+		//&models.FlightTicketDetails{},
 	)
 }
 

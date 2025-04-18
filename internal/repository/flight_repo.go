@@ -29,8 +29,12 @@ func (f fightRepository) GetByID(id int) (*models.Flight, error) {
 }
 
 func (f fightRepository) GetByCode(code string) (*models.Flight, error) {
-	//TODO implement me
-	panic("implement me")
+	var flight models.Flight
+	result := f.db.Where("flight_code = ?", code).First(&flight)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return &flight, nil
 }
 
 func (f fightRepository) Create(flight *models.Flight) (*models.Flight, error) {
@@ -49,4 +53,12 @@ func (f fightRepository) Update(flight *models.Flight) (*models.Flight, error) {
 func (f fightRepository) Delete(flight *models.Flight) error {
 	//TODO implement me
 	panic("implement me")
+}
+
+func (f fightRepository) CreateIntermediateStops(stops []*models.IntermediateStop) ([]*models.IntermediateStop, error) {
+	result := f.db.Create(&stops)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return stops, nil
 }

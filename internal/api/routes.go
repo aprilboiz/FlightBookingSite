@@ -2,6 +2,7 @@ package api
 
 import (
 	"github.com/aprilboiz/flight-management/internal/api/handlers"
+	"github.com/aprilboiz/flight-management/internal/dto"
 	"github.com/aprilboiz/flight-management/internal/middleware"
 	"github.com/gin-gonic/gin"
 )
@@ -19,7 +20,7 @@ func SetupRoutes(router *gin.Engine, h Handlers) {
 
 	flightRoutes := v1.Group("/flights")
 	{
-		flightRoutes.POST("", h.FlightHandler.CreateFlight)
+		flightRoutes.POST("", middleware.ValidateRequest(&dto.FlightRequest{}), h.FlightHandler.CreateFlight)
 		flightRoutes.GET("", h.FlightHandler.GetAllFlights)
 		flightRoutes.GET("/:code", h.FlightHandler.GetFlightByCode)
 		flightRoutes.PUT("/:code", h.FlightHandler.UpdateFlight)

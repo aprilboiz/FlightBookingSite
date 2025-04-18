@@ -1,16 +1,38 @@
 package dto
 
 type FlightRequest struct {
-	BasePrice         float64             `json:"base_price"`
-	DepartureAirport  string              `json:"departure"`
-	ArrivalAirport    string              `json:"arrival"`
-	DepartureDateTime string              `json:"departure_date"`
-	Duration          int                 `json:"duration"`
-	IntermediateStop  IntermediateStopDTO `json:"intermediate_stop"`
+	DepartureAirport  string                `json:"departure_airport"`
+	ArrivalAirport    string                `json:"arrival_airport"`
+	Duration          int                   `json:"duration"`
+	BasePrice         float64               `json:"base_price"`
+	DepartureDateTime string                `json:"departure_date"`
+	PlaneCode         string                `json:"plane_code"`
+	IntermediateStop  []IntermediateStopDTO `json:"intermediate_stop"`
 }
 
 type IntermediateStopDTO struct {
 	StopAirport  string `json:"stop_airport"`
 	StopDuration int    `json:"stop_duration"`
 	Note         string `json:"note"`
+}
+
+type FlightResponse struct {
+	FlightCode        string                `json:"flight_code"`
+	DepartureAirport  string                `json:"departure_airport"`
+	ArrivalAirport    string                `json:"arrival_airport"`
+	Duration          int                   `json:"duration"`
+	BasePrice         float64               `json:"base_price"`
+	DepartureDateTime string                `json:"departure_date"`
+	PlaneCode         string                `json:"plane_code"`
+	IntermediateStop  []IntermediateStopDTO `json:"intermediate_stop"`
+}
+
+type FlightResponseInList struct {
+	FlightCode        string `json:"flight_code"`
+	PlaneCode         string `json:"plane_code"`
+	DepartureAirport  string `json:"departure_airport"`
+	ArrivalAirport    string `json:"arrival_airport"`
+	DepartureDateTime string `json:"departure_date"`
+	EmptySeats        int    `json:"empty_seats"`
+	BookedSeats       int    `json:"booked_seats"`
 }

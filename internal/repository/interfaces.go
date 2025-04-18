@@ -11,15 +11,18 @@ type FlightRepository interface {
 	Create(flight *models.Flight) (*models.Flight, error)
 	Update(flight *models.Flight) (*models.Flight, error)
 	Delete(flight *models.Flight) error
+	CreateIntermediateStops(stops []*models.IntermediateStop) ([]*models.IntermediateStop, error)
 }
 
 type AirportRepository interface {
+	GetAll() ([]*models.Airport, error)
 	GetByCode(code string) (*models.Airport, error)
 	GetByCodes(codes []string) (map[string]*models.Airport, error)
 }
 
 type PlaneRepository interface {
 	GetByID(id uint) (*models.Plane, error)
+	GetByCode(code string) (*models.Plane, error)
 }
 
 type TicketClassRepository interface {

@@ -6,10 +6,16 @@ import (
 )
 
 type FlightService interface {
-	GetAllFlights() ([]*models.Flight, error)
-	GetFlightByID(flightID string) (*models.Flight, error)
-	GetFlightByCode(flightCode string) (*models.Flight, error)
-	Create(flightRequest *dto.FlightRequest) (*models.Flight, error)
-	Update(flightCode string, flightRequest *dto.FlightRequest) (*models.Flight, error)
+	GetAllFlights() ([]*dto.FlightResponse, error)
+	GetFlightByID(flightID string) (*dto.FlightResponse, error)
+	GetFlightByCode(flightCode string) (*dto.FlightResponse, error)
+	Create(flightRequest *dto.FlightRequest) (*dto.FlightResponse, error)
+	Update(flightCode string, flightRequest *dto.FlightRequest) (*dto.FlightResponse, error)
 	DeleteByCode(code string) error
+}
+
+type AirportService interface {
+	GetAllAirports() ([]*models.Airport, error)
+	GetAirportByCode(code string) (*models.Airport, error)
+	GetAirportsByCodes(codes []string) (map[string]*models.Airport, error)
 }

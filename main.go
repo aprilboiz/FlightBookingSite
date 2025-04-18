@@ -18,11 +18,15 @@ func main() {
 	log.Info("Setting up the application")
 	db := database.GetDatabase(log)
 
+	// Declare repositories
 	flightRepo := repository.NewFlightRepository(db)
-	airportRepo := repository.NewAirportRepository(db)
-	ticketClassRepo := repository.NewTicketClassRepository(db)
-	planeRepo := repository.NewPlaneRepository(db)
-	flightService := service.NewFlightService(flightRepo, airportRepo, ticketClassRepo)
+	//airportRepo := repository.NewAirportRepository(db)
+	//planeRepo := repository.NewPlaneRepository(db)
+
+	// Declare services
+	flightService := service.NewFlightService(flightRepo)
+
+	// Declare handlers
 	flightHandler := handlers.NewFlightHandler(flightService)
 
 	h := api.Handlers{FlightHandler: flightHandler}
