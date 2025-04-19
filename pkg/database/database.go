@@ -107,10 +107,10 @@ func dropAllTables(db *gorm.DB) error {
 }
 
 func migrateDatabase(db *gorm.DB) error {
-	err := db.SetupJoinTable(&models.Flight{}, "IntermediateStops", &models.IntermediateStop{})
-	if err != nil {
-		return err
-	}
+	//err := db.SetupJoinTable(&models.Flight{}, "IntermediateStops", &models.IntermediateStop{})
+	//if err != nil {
+	//	return err
+	//}
 	return db.AutoMigrate(
 		&models.Plane{},
 		&models.TicketClass{},

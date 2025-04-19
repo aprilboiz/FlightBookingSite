@@ -1,6 +1,9 @@
 package repository
 
 import (
+	"errors"
+	"fmt"
+	e "github.com/aprilboiz/flight-management/internal/exceptions"
 	"github.com/aprilboiz/flight-management/internal/models"
 	"gorm.io/gorm"
 )
@@ -17,7 +20,10 @@ func (p planeRepository) GetByCode(code string) (*models.Plane, error) {
 	var plane models.Plane
 	result := p.db.Where("plane_code = ?", code).First(&plane)
 	if result.Error != nil {
-		return nil, result.Error
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return nil, e.NewAppError(e.NOT_FOUND, fmt.Sprintf("Plane with code '%s' not found", code), nil)
+		}
+		return nil, e.NewAppError(e.BAD_REQUEST, "Failed to retrieve plane", result.Error)
 	}
 	return &plane, nil
 }

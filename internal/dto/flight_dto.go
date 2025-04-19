@@ -7,12 +7,13 @@ type FlightRequest struct {
 	BasePrice         float64               `json:"base_price"`
 	DepartureDateTime string                `json:"departure_date"`
 	PlaneCode         string                `json:"plane_code"`
-	IntermediateStop  []IntermediateStopDTO `json:"intermediate_stop"`
+	IntermediateStop  []IntermediateStopDTO `json:"intermediate_stops"`
 }
 
 type IntermediateStopDTO struct {
 	StopAirport  string `json:"stop_airport"`
 	StopDuration int    `json:"stop_duration"`
+	StopOrder    int    `json:"stop_order"`
 	Note         string `json:"note"`
 }
 

@@ -5,17 +5,19 @@ import (
 	"github.com/aprilboiz/flight-management/internal/dto"
 	"github.com/aprilboiz/flight-management/internal/middleware"
 	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 )
 
 type Handlers struct {
 	FlightHandler handlers.FlightHandler
+	Logger        *zap.Logger
 }
 
 func SetupRoutes(router *gin.Engine, h Handlers) {
 	// Global middleware (e.g., logging, CORS - if needed)
 	// router.Use(middleware.Logger())
 	// router.Use(middleware.Cors())
-	router.Use(middleware.ErrorHandler())
+	router.Use(middleware.ErrorHandler(h.Logger))
 	v1 := router.Group("/api/v1")
 
 	flightRoutes := v1.Group("/flights")

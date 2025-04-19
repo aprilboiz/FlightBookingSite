@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"github.com/aprilboiz/flight-management/internal/dto"
+	e "github.com/aprilboiz/flight-management/internal/exceptions"
 	"github.com/aprilboiz/flight-management/internal/service"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -16,8 +17,12 @@ func NewFlightHandler(flightService service.FlightService) FlightHandler {
 }
 
 func (f flightHandler) GetAllFlights(c *gin.Context) {
-	//TODO implement me
-	panic("implement me")
+	flights, err := f.flightService.GetAllFlights()
+	if err != nil {
+		_ = c.Error(e.NewAppError(e.BAD_REQUEST, err.Error(), nil))
+		return
+	}
+	c.JSON(http.StatusOK, flights)
 }
 
 func (f flightHandler) GetFlightByCode(c *gin.Context) {
@@ -28,17 +33,17 @@ func (f flightHandler) GetFlightByCode(c *gin.Context) {
 func (f flightHandler) CreateFlight(c *gin.Context) {
 	validatedModel, exists := c.Get("validatedModel")
 	if !exists {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "validated model not found"})
+		_ = c.Error(e.NewAppError(e.BAD_REQUEST, "validated model not found", nil))
 		return
 	}
 	flightRequest, ok := validatedModel.(*dto.FlightRequest)
 	if !ok {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid validated model"})
+		_ = c.Error(e.NewAppError(e.BAD_REQUEST, "invalid flight request body", nil))
 		return
 	}
 	flightResponse, err := f.flightService.Create(flightRequest)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		_ = c.Error(e.NewAppError(e.BAD_REQUEST, err.Error(), nil))
 		return
 	}
 	c.JSON(http.StatusCreated, flightResponse)

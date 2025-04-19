@@ -14,13 +14,28 @@ func NewFlightRepository(db *gorm.DB) FlightRepository {
 }
 
 func (f fightRepository) GetAll() ([]*models.Flight, error) {
-	//TODO implement me
-	panic("implement me")
+	var flights []*models.Flight
+	result := f.db.
+		Preload("DepartureAirport").
+		Preload("ArrivalAirport").
+		Preload("Plane").
+		Preload("IntermediateStops.Airport").
+		Find(&flights)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return flights, nil
 }
 
 func (f fightRepository) GetByID(id int) (*models.Flight, error) {
 	var flight models.Flight
-	result := f.db.First(&flight, id)
+	result := f.db.
+		Preload("DepartureAirport").
+		Preload("ArrivalAirport").
+		Preload("Plane").
+		Preload("IntermediateStops.Airport").
+		Where("id = ?", id).
+		First(&flight)
 	if result.Error != nil {
 		return nil, result.Error
 	}
@@ -30,7 +45,13 @@ func (f fightRepository) GetByID(id int) (*models.Flight, error) {
 
 func (f fightRepository) GetByCode(code string) (*models.Flight, error) {
 	var flight models.Flight
-	result := f.db.Where("flight_code = ?", code).First(&flight)
+	result := f.db.
+		Preload("DepartureAirport").
+		Preload("ArrivalAirport").
+		Preload("Plane").
+		Preload("IntermediateStops.Airport").
+		Where("flight_code = ?", code).
+		First(&flight)
 	if result.Error != nil {
 		return nil, result.Error
 	}

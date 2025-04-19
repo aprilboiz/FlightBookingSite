@@ -20,16 +20,19 @@ func main() {
 
 	// Declare repositories
 	flightRepo := repository.NewFlightRepository(db)
-	//airportRepo := repository.NewAirportRepository(db)
-	//planeRepo := repository.NewPlaneRepository(db)
+	airportRepo := repository.NewAirportRepository(db)
+	planeRepo := repository.NewPlaneRepository(db)
 
 	// Declare services
-	flightService := service.NewFlightService(flightRepo)
+	flightService := service.NewFlightService(flightRepo, airportRepo, planeRepo)
 
 	// Declare handlers
 	flightHandler := handlers.NewFlightHandler(flightService)
 
-	h := api.Handlers{FlightHandler: flightHandler}
+	h := api.Handlers{
+		FlightHandler: flightHandler,
+		Logger:        log,
+	}
 	router := gin.Default()
 	api.SetupRoutes(router, h)
 

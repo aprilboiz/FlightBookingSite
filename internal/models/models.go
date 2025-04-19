@@ -8,6 +8,7 @@ import (
 type Plane struct {
 	gorm.Model
 	PlaneCode string `gorm:"unique;not null"`
+	PlaneName string `gorm:"not null"`
 
 	Seats []Seat `gorm:"foreignKey:PlaneID;references:ID"`
 }
@@ -23,6 +24,7 @@ type TicketClass struct {
 type Airport struct {
 	gorm.Model
 	AirportCode string `gorm:"not null"`
+	AirportName string `gorm:"not null"`
 	CityName    string `gorm:"not null"`
 	CountryName string `gorm:"not null"`
 
@@ -50,14 +52,16 @@ type Flight struct {
 	FlightDuration     int       `gorm:"not null"`
 	BasePrice          float64   `gorm:"not null"`
 
-	DepartureAirport Airport `gorm:"foreignKey:DepartureAirportID;references:ID"`
-	ArrivalAirport   Airport `gorm:"foreignKey:ArrivalAirportID;references:ID"`
-	Plane            Plane   `gorm:"foreignKey:PlaneID;references:ID"`
+	DepartureAirport  Airport `gorm:"foreignKey:DepartureAirportID;references:ID"`
+	ArrivalAirport    Airport `gorm:"foreignKey:ArrivalAirportID;references:ID"`
+	Plane             Plane   `gorm:"foreignKey:PlaneID;references:ID"`
+	IntermediateStops []IntermediateStop
 }
 
 type IntermediateStop struct {
 	FlightID     uint   `gorm:"primaryKey"`
 	AirportID    uint   `gorm:"primaryKey"`
+	StopOrder    int    `gorm:"not null"`
 	StopDuration int    `gorm:"not null"`
 	Note         string `gorm:"nullable"`
 

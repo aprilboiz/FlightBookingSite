@@ -13,13 +13,45 @@ type flightService struct {
 	planeRepo   repository.PlaneRepository
 }
 
-func NewFlightService(flightRepo repository.FlightRepository) FlightService {
-	return &flightService{flightRepo: flightRepo}
+func NewFlightService(flightRepo repository.FlightRepository, airportRepo repository.AirportRepository, planeRepo repository.PlaneRepository) FlightService {
+
+	if flightRepo == nil || airportRepo == nil || planeRepo == nil {
+		panic("Missing required repositories for flight service")
+	}
+	return &flightService{
+		flightRepo:  flightRepo,
+		airportRepo: airportRepo,
+		planeRepo:   planeRepo,
+	}
 }
 
 func (f flightService) GetAllFlights() ([]*dto.FlightResponse, error) {
-	//TODO implement me
-	panic("implement me")
+	flights, err := f.flightRepo.GetAll()
+	if err != nil {
+		return nil, err
+	}
+	flightResponses := make([]*dto.FlightResponse, len(flights))
+	for i, flight := range flights {
+		flightResponses[i] = &dto.FlightResponse{
+			FlightCode:        flight.FlightCode,
+			DepartureAirport:  flight.DepartureAirport.AirportCode,
+			ArrivalAirport:    flight.ArrivalAirport.AirportCode,
+			Duration:          flight.FlightDuration,
+			BasePrice:         flight.BasePrice,
+			DepartureDateTime: flight.DepartureDateTime.Format(time.RFC3339),
+			PlaneCode:         flight.Plane.PlaneCode,
+		}
+		intermediateStops := make([]dto.IntermediateStopDTO, len(flight.IntermediateStops))
+		for j, stop := range flight.IntermediateStops {
+			intermediateStops[j] = dto.IntermediateStopDTO{
+				StopAirport:  stop.Airport.AirportCode,
+				StopDuration: stop.StopDuration,
+				StopOrder:    stop.StopOrder,
+				Note:         stop.Note,
+			}
+		}
+	}
+	return flightResponses, nil
 }
 
 func (f flightService) GetFlightByID(flightID string) (*dto.FlightResponse, error) {
@@ -75,6 +107,7 @@ func (f flightService) Create(flightRequest *dto.FlightRequest) (*dto.FlightResp
 			FlightID:     createdFlight.ID,
 			AirportID:    airport.ID,
 			StopDuration: stop.StopDuration,
+			StopOrder:    stop.StopOrder,
 			Note:         stop.Note,
 		}
 	}
@@ -83,13 +116,14 @@ func (f flightService) Create(flightRequest *dto.FlightRequest) (*dto.FlightResp
 		return nil, err
 	}
 
-	// Create the flight response DTO
+	// CREATE THE FLIGHT RESPONSE DTO
 	// Map the created intermediate stops to DTOs
 	intermediateStopDTOs := make([]dto.IntermediateStopDTO, len(createdIntermediateStops))
 	for i, stop := range createdIntermediateStops {
 		intermediateStopDTOs[i] = dto.IntermediateStopDTO{
 			StopAirport:  stop.Airport.AirportCode,
 			StopDuration: stop.StopDuration,
+			StopOrder:    stop.StopOrder,
 			Note:         stop.Note,
 		}
 	}

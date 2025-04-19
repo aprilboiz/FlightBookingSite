@@ -10,6 +10,9 @@ type airportService struct {
 }
 
 func NewAirportService(airportRepo repository.AirportRepository) AirportService {
+	if airportRepo == nil {
+		panic("Missing required repositories for airport service")
+	}
 	return &airportService{airportRepo: airportRepo}
 }
 
