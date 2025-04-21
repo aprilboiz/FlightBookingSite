@@ -16,6 +16,7 @@ const (
 	GATEWAY_TIMEOUT            = "gateway_timeout"
 	NOT_IMPLEMENTED            = "not_implemented"
 	HTTP_VERSION_NOT_SUPPORTED = "http_version_not_supported"
+	METHOD_NOT_ALLOWED         = "method_not_allowed"
 )
 
 var ErrorType = map[string]*ErrorInfo{
@@ -70,5 +71,9 @@ var ErrorType = map[string]*ErrorInfo{
 	HTTP_VERSION_NOT_SUPPORTED: {
 		StatusCode: http.StatusHTTPVersionNotSupported,
 		Title:      http.StatusText(http.StatusHTTPVersionNotSupported),
+	},
+	METHOD_NOT_ALLOWED: {
+		StatusCode: http.StatusMethodNotAllowed,
+		Title:      http.StatusText(http.StatusMethodNotAllowed),
 	},
 }

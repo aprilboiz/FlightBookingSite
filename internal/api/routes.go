@@ -3,6 +3,7 @@ package api
 import (
 	"github.com/aprilboiz/flight-management/internal/api/handlers"
 	"github.com/aprilboiz/flight-management/internal/dto"
+	ex "github.com/aprilboiz/flight-management/internal/exceptions"
 	"github.com/aprilboiz/flight-management/internal/middleware"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
@@ -18,6 +19,12 @@ func SetupRoutes(router *gin.Engine, h Handlers) {
 	// router.Use(middleware.Logger())
 	// router.Use(middleware.Cors())
 	router.Use(middleware.ErrorHandler(h.Logger))
+	router.NoRoute(func(c *gin.Context) {
+		_ = c.Error(ex.NewAppError(ex.NOT_FOUND, "Not found this route!", map[string]any{
+			"path":   c.Request.URL.Path,
+			"method": c.Request.Method,
+		}))
+	})
 	v1 := router.Group("/api/v1")
 
 	flightRoutes := v1.Group("/flights")
