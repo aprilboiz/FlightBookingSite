@@ -2,7 +2,9 @@ package database
 
 import (
 	"errors"
-	"strconv"
+	"fmt"
+	"github.com/aprilboiz/flight-management/pkg/config"
+	"os"
 	"time"
 
 	"github.com/aprilboiz/flight-management/internal/models"
@@ -13,15 +15,6 @@ import (
 )
 
 var database *gorm.DB
-
-type Config struct {
-	Host     string
-	Port     int
-	Username string
-	Password string
-	Dbname   string
-	Timezone string
-}
 
 func GetDatabase(log *zap.Logger) *gorm.DB {
 	if database != nil {
@@ -34,28 +27,12 @@ func GetDatabase(log *zap.Logger) *gorm.DB {
 	return db
 }
 
-func (config *Config) dsn() string {
-	return "host=" + config.Host +
-		" port=" + strconv.Itoa(config.Port) +
-		" user=" + config.Username +
-		" password=" + config.Password +
-		" dbname=" + config.Dbname +
-		" TimeZone=" + config.Timezone
-}
-
 func initialize(log *zap.Logger) (*gorm.DB, error) {
-	config := Config{
-		Host:     "localhost",
-		Port:     5432,
-		Username: "postgres",
-		Password: "postgres",
-		Dbname:   "flight_management",
-		Timezone: "Asia/Ho_Chi_Minh",
-	}
+	cfg := config.GetConfig()
 
 	// Configure GORM logger
 	gormLogger := logger.New(
-		zap.NewStdLog(log), // io writer
+		zap.NewStdLog(log),
 		logger.Config{
 			SlowThreshold:             time.Second,
 			LogLevel:                  logger.Info,
@@ -64,21 +41,20 @@ func initialize(log *zap.Logger) (*gorm.DB, error) {
 		},
 	)
 
-	db, err := gorm.Open(postgres.Open(config.dsn()), &gorm.Config{
+	db, err := gorm.Open(postgres.Open(config.GetDatabaseConnectionString()), &gorm.Config{
 		Logger: gormLogger,
 	})
 	if err != nil {
 		return nil, err
 	}
 
-	log.Info("Connected to database", zap.String("dsn", config.dsn()))
+	log.Info("Connected to database", zap.String("dsn", config.GetDatabaseConnectionString()))
 
-	// Optional: Drop tables on startup (useful for development)
-	// Comment out for production
-	log.Warn("Dropping all tables (Development only!)")
-	if err := dropAllTables(db); err != nil {
-		log.Error("Failed to drop tables", zap.Error(err))
-		// Decide if you want to return error or continue
+	if cfg.Environment == config.EnvironmentDevelopment {
+		log.Warn("Dropping all tables (Development only!)")
+		if err := dropAllTables(db); err != nil {
+			log.Error("Failed to drop tables", zap.Error(err))
+		}
 	}
 
 	log.Info("Migrating database schema")
@@ -87,8 +63,16 @@ func initialize(log *zap.Logger) (*gorm.DB, error) {
 		return nil, err
 	}
 
-	log.Info("Initialized database successfully")
 	database = db
+	log.Info("Initialized database successfully")
+	if cfg.Database.Init.RunSeed {
+		log.Info("Running seed script")
+		err := runSQLScript(cfg.Database.Init.SeedPath)
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	return db, nil
 }
 
@@ -153,4 +137,27 @@ func GetNextValSequence(table string, column string) (uint, error) {
 		return 0, err
 	}
 	return nextVal, nil
+}
+
+func runSQLScript(sqlFilePath string) error {
+	// Read the SQL file
+	sqlBytes, err := os.ReadFile(sqlFilePath)
+	if err != nil {
+		return fmt.Errorf("failed to read SQL file: %w", err)
+	}
+
+	// Get the database connection
+	db := database
+	if db == nil {
+		return errors.New("database connection is nil")
+	}
+
+	// Execute the SQL script
+	err = db.Exec(string(sqlBytes)).Error
+	if err != nil {
+		return fmt.Errorf("failed to execute SQL script: %w", err)
+	}
+
+	zap.L().Info("SQL script executed successfully")
+	return nil
 }
