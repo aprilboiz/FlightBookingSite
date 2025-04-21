@@ -16,7 +16,7 @@ func main() {
 	log := logger.Get()
 
 	log.Info("Setting up the application")
-	db := database.GetDatabase(log)
+	db := database.GetDatabase()
 
 	// Declare repositories
 	flightRepo := repository.NewFlightRepository(db)

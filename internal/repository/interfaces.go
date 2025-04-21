@@ -29,7 +29,3 @@ type TicketClassRepository interface {
 	GetByName(name string) (*models.TicketClass, error)
 	GetByNames(names []string) (map[string]*models.TicketClass, error)
 }
-
-type FlightCodeGenerator interface {
-	Generate() (string, error)
-}

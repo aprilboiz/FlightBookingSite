@@ -19,3 +19,7 @@ type AirportService interface {
 	GetAirportByCode(code string) (*models.Airport, error)
 	GetAirportsByCodes(codes []string) (map[string]*models.Airport, error)
 }
+
+type FlightCodeGenerator interface {
+	Generate() (string, error)
+}

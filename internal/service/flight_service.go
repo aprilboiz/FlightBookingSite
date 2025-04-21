@@ -1,9 +1,12 @@
 package service
 
 import (
+	"fmt"
 	"github.com/aprilboiz/flight-management/internal/dto"
+	"github.com/aprilboiz/flight-management/internal/exceptions"
 	"github.com/aprilboiz/flight-management/internal/models"
 	"github.com/aprilboiz/flight-management/internal/repository"
+	"github.com/aprilboiz/flight-management/pkg/database"
 	"time"
 )
 
@@ -11,6 +14,31 @@ type flightService struct {
 	flightRepo  repository.FlightRepository
 	airportRepo repository.AirportRepository
 	planeRepo   repository.PlaneRepository
+}
+
+type flightCodeGenerator struct {
+}
+
+func NewFlightCodeGenerator() FlightCodeGenerator {
+	return &flightCodeGenerator{}
+}
+
+func (g *flightCodeGenerator) Generate() (string, error) {
+	// Get the latest flight ID from the database
+	// Assuming you have a sequence or can get the max ID
+	nextID, err := database.GetNextValSequence("flights", "id")
+	if err != nil {
+		return "", fmt.Errorf("failed to generate flight code: %w", err)
+	}
+
+	// Format the ID to have leading zeros up to 4 digits
+	// e.g., 1 -> "0001", 10 -> "0010", 100 -> "0100", 1000 -> "1000"
+	formattedID := fmt.Sprintf("%04d", nextID)
+
+	// Prefix with company name
+	flightCode := "RuaAirline" + formattedID
+
+	return flightCode, nil
 }
 
 func NewFlightService(flightRepo repository.FlightRepository, airportRepo repository.AirportRepository, planeRepo repository.PlaneRepository) FlightService {
@@ -65,7 +93,7 @@ func (f flightService) GetFlightByCode(flightCode string) (*dto.FlightResponse, 
 }
 
 func (f flightService) Create(flightRequest *dto.FlightRequest) (*dto.FlightResponse, error) {
-	flightCode := "Hello"
+	flightCode, _ := NewFlightCodeGenerator().Generate()
 	plane, err := f.planeRepo.GetByCode(flightRequest.PlaneCode)
 	if err != nil {
 		return nil, err
@@ -94,7 +122,7 @@ func (f flightService) Create(flightRequest *dto.FlightRequest) (*dto.FlightResp
 	}
 	createdFlight, err := f.flightRepo.Create(newFlight)
 	if err != nil {
-		return nil, err
+		return nil, exceptions.NewAppError(exceptions.BAD_REQUEST, "Failed to create flight", err.Error())
 	}
 
 	intermediateStops := make([]*models.IntermediateStop, len(flightRequest.IntermediateStop))
@@ -111,15 +139,19 @@ func (f flightService) Create(flightRequest *dto.FlightRequest) (*dto.FlightResp
 			Note:         stop.Note,
 		}
 	}
-	createdIntermediateStops, err := f.flightRepo.CreateIntermediateStops(intermediateStops)
+	_, err = f.flightRepo.CreateIntermediateStops(intermediateStops)
 	if err != nil {
 		return nil, err
 	}
 
 	// CREATE THE FLIGHT RESPONSE DTO
+	createdFlight, err = f.flightRepo.GetByCode(flightCode)
+	if err != nil {
+		return nil, exceptions.NewAppError(exceptions.BAD_REQUEST, "Failed to retrieve created flight", err)
+	}
 	// Map the created intermediate stops to DTOs
-	intermediateStopDTOs := make([]dto.IntermediateStopDTO, len(createdIntermediateStops))
-	for i, stop := range createdIntermediateStops {
+	intermediateStopDTOs := make([]dto.IntermediateStopDTO, len(createdFlight.IntermediateStops))
+	for i, stop := range createdFlight.IntermediateStops {
 		intermediateStopDTOs[i] = dto.IntermediateStopDTO{
 			StopAirport:  stop.Airport.AirportCode,
 			StopDuration: stop.StopDuration,

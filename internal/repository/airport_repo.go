@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"github.com/aprilboiz/flight-management/internal/exceptions"
 	"github.com/aprilboiz/flight-management/internal/models"
 	"gorm.io/gorm"
 )
@@ -26,7 +27,7 @@ func (a airportRepository) GetByCode(code string) (*models.Airport, error) {
 	var flight models.Airport
 	result := a.db.Where("airport_code = ?", code).First(&flight)
 	if result.Error != nil {
-		return nil, result.Error
+		return nil, exceptions.NewAppError(exceptions.NOT_FOUND, "Airport with code "+code+" not found", nil)
 	}
 	return &flight, nil
 }
@@ -35,7 +36,7 @@ func (a airportRepository) GetByCodes(codes []string) (map[string]*models.Airpor
 	flights := make([]*models.Airport, 0)
 	result := a.db.Where("airport_code IN ?", codes).Find(&flights)
 	if result.Error != nil {
-		return nil, result.Error
+		return nil, exceptions.NewAppError(exceptions.NOT_FOUND, result.Error.Error(), nil)
 	}
 	airportMap := make(map[string]*models.Airport)
 	for _, flight := range flights {

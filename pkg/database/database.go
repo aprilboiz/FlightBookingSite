@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/aprilboiz/flight-management/pkg/config"
+	"log"
 	"os"
 	"time"
 
@@ -16,11 +17,11 @@ import (
 
 var database *gorm.DB
 
-func GetDatabase(log *zap.Logger) *gorm.DB {
+func GetDatabase() *gorm.DB {
 	if database != nil {
 		return database
 	}
-	db, err := initialize(log)
+	db, err := initialize(zap.L())
 	if err != nil {
 		log.Fatal("Failed to connect to database", zap.Error(err))
 	}
