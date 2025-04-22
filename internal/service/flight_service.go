@@ -1,6 +1,7 @@
 package service
 
 import (
+	"errors"
 	"fmt"
 	"github.com/aprilboiz/flight-management/internal/dto"
 	"github.com/aprilboiz/flight-management/internal/exceptions"
@@ -28,7 +29,7 @@ func (g *flightCodeGenerator) Generate() (string, error) {
 	// Assuming you have a sequence or can get the max ID
 	nextID, err := database.GetNextValSequence("flights", "id")
 	if err != nil {
-		return "", fmt.Errorf("failed to generate flight code: %w", err)
+		return "", exceptions.Internal("failed to get next ID", err)
 	}
 
 	// Format the ID to have leading zeros up to 4 digits
@@ -56,7 +57,16 @@ func NewFlightService(flightRepo repository.FlightRepository, airportRepo reposi
 func (f flightService) GetAllFlights() ([]*dto.FlightResponse, error) {
 	flights, err := f.flightRepo.GetAll()
 	if err != nil {
-		return nil, err
+		var appErr *exceptions.AppError
+		if errors.As(err, &appErr) {
+			return nil, &exceptions.AppError{
+				Code:       appErr.Code,
+				Message:    fmt.Sprintf("Error retrieving flights: %s", appErr.Message),
+				StatusCode: appErr.StatusCode,
+				Err:        appErr.Err,
+			}
+		}
+		return nil, exceptions.Internal("Unexpected error retrieving flights", err)
 	}
 	flightResponses := make([]*dto.FlightResponse, len(flights))
 	for i, flight := range flights {
@@ -82,33 +92,121 @@ func (f flightService) GetAllFlights() ([]*dto.FlightResponse, error) {
 	return flightResponses, nil
 }
 
-func (f flightService) GetFlightByID(flightID string) (*dto.FlightResponse, error) {
-	//TODO implement me
-	panic("implement me")
+func (f flightService) GetFlightByID(flightID int) (*dto.FlightResponse, error) {
+	flight, err := f.flightRepo.GetByID(flightID)
+	if err != nil {
+		var appErr *exceptions.AppError
+		if errors.As(err, &appErr) {
+			return nil, &exceptions.AppError{
+				Code:       appErr.Code,
+				Message:    fmt.Sprintf("Error retrieving flight with ID '%d': %s", flightID, appErr.Message),
+				StatusCode: appErr.StatusCode,
+				Err:        appErr.Err,
+			}
+		}
+		return nil, exceptions.Internal("Unexpected error retrieving flight", err)
+	}
+	flightResponse := &dto.FlightResponse{
+		FlightCode:        flight.FlightCode,
+		DepartureAirport:  flight.DepartureAirport.AirportCode,
+		ArrivalAirport:    flight.ArrivalAirport.AirportCode,
+		Duration:          flight.FlightDuration,
+		BasePrice:         flight.BasePrice,
+		DepartureDateTime: flight.DepartureDateTime.Format(time.RFC3339),
+		PlaneCode:         flight.Plane.PlaneCode,
+		IntermediateStop:  make([]dto.IntermediateStopDTO, len(flight.IntermediateStops)),
+	}
+	for i, stop := range flight.IntermediateStops {
+		flightResponse.IntermediateStop[i] = dto.IntermediateStopDTO{
+			StopAirport:  stop.Airport.AirportCode,
+			StopDuration: stop.StopDuration,
+			StopOrder:    stop.StopOrder,
+			Note:         stop.Note,
+		}
+	}
+	return flightResponse, nil
 }
 
 func (f flightService) GetFlightByCode(flightCode string) (*dto.FlightResponse, error) {
-	//TODO implement me
-	panic("implement me")
+	flight, err := f.flightRepo.GetByCode(flightCode)
+	if err != nil {
+		var appErr *exceptions.AppError
+		if errors.As(err, &appErr) {
+			return nil, &exceptions.AppError{
+				Code:       appErr.Code,
+				Message:    fmt.Sprintf("Error retrieving flight '%s': %s", flightCode, appErr.Message),
+				StatusCode: appErr.StatusCode,
+				Err:        appErr.Err,
+			}
+		}
+		return nil, exceptions.Internal("Unexpected error retrieving flight", err)
+	}
+	flightResponse := &dto.FlightResponse{
+		FlightCode:        flight.FlightCode,
+		DepartureAirport:  flight.DepartureAirport.AirportCode,
+		ArrivalAirport:    flight.ArrivalAirport.AirportCode,
+		Duration:          flight.FlightDuration,
+		BasePrice:         flight.BasePrice,
+		DepartureDateTime: flight.DepartureDateTime.Format(time.RFC3339),
+		PlaneCode:         flight.Plane.PlaneCode,
+		IntermediateStop:  make([]dto.IntermediateStopDTO, len(flight.IntermediateStops)),
+	}
+	for i, stop := range flight.IntermediateStops {
+		flightResponse.IntermediateStop[i] = dto.IntermediateStopDTO{
+			StopAirport:  stop.Airport.AirportCode,
+			StopDuration: stop.StopDuration,
+			StopOrder:    stop.StopOrder,
+			Note:         stop.Note,
+		}
+	}
+	return flightResponse, nil
 }
 
 func (f flightService) Create(flightRequest *dto.FlightRequest) (*dto.FlightResponse, error) {
-	flightCode, _ := NewFlightCodeGenerator().Generate()
+	flightCode, err := NewFlightCodeGenerator().Generate()
+	if err != nil {
+		var appErr *exceptions.AppError
+		if errors.As(err, &appErr) {
+			return nil, &exceptions.AppError{
+				Code:       appErr.Code,
+				Message:    fmt.Sprintf("Error generating flight code: %s", appErr.Message),
+				StatusCode: appErr.StatusCode,
+				Err:        appErr.Err,
+			}
+		}
+		return nil, exceptions.Internal("failed to generate flight code", err)
+	}
 	plane, err := f.planeRepo.GetByCode(flightRequest.PlaneCode)
 	if err != nil {
-		return nil, err
+		var appErr *exceptions.AppError
+		if errors.As(err, &appErr) {
+			return nil, appErr
+		}
+		return nil, exceptions.Internal("failed to get plane by code", err)
 	}
 	departureAirport, err := f.airportRepo.GetByCode(flightRequest.DepartureAirport)
 	if err != nil {
-		return nil, err
+		var appErr *exceptions.AppError
+		if errors.As(err, &appErr) {
+			return nil, appErr
+		}
+		return nil, exceptions.Internal("failed to get departure airport by code", err)
 	}
 	arrivalAirport, err := f.airportRepo.GetByCode(flightRequest.ArrivalAirport)
 	if err != nil {
-		return nil, err
+		var appErr *exceptions.AppError
+		if errors.As(err, &appErr) {
+			return nil, appErr
+		}
+		return nil, exceptions.Internal("failed to get arrival airport by code", err)
 	}
 	departureDateTime, err := time.Parse(time.DateTime, flightRequest.DepartureDateTime)
 	if err != nil {
-		return nil, err
+		var appErr *exceptions.AppError
+		if errors.As(err, &appErr) {
+			return nil, appErr
+		}
+		return nil, exceptions.Internal("failed to parse departure date time", err)
 	}
 
 	newFlight := &models.Flight{
@@ -122,14 +220,22 @@ func (f flightService) Create(flightRequest *dto.FlightRequest) (*dto.FlightResp
 	}
 	createdFlight, err := f.flightRepo.Create(newFlight)
 	if err != nil {
-		return nil, exceptions.NewAppError(exceptions.BAD_REQUEST, "Failed to create flight", err.Error())
+		var appErr *exceptions.AppError
+		if errors.As(err, &appErr) {
+			return nil, appErr
+		}
+		return nil, exceptions.Internal("failed to create flight", err)
 	}
 
 	intermediateStops := make([]*models.IntermediateStop, len(flightRequest.IntermediateStop))
 	for i, stop := range flightRequest.IntermediateStop {
 		airport, err := f.airportRepo.GetByCode(stop.StopAirport)
 		if err != nil {
-			return nil, err
+			var appErr *exceptions.AppError
+			if errors.As(err, &appErr) {
+				return nil, appErr
+			}
+			return nil, exceptions.Internal("failed to get intermediate airport by code", err)
 		}
 		intermediateStops[i] = &models.IntermediateStop{
 			FlightID:     createdFlight.ID,
@@ -141,13 +247,17 @@ func (f flightService) Create(flightRequest *dto.FlightRequest) (*dto.FlightResp
 	}
 	_, err = f.flightRepo.CreateIntermediateStops(intermediateStops)
 	if err != nil {
-		return nil, err
+		var appErr *exceptions.AppError
+		if errors.As(err, &appErr) {
+			return nil, appErr
+		}
+		return nil, exceptions.Internal("failed to create intermediate stops", err)
 	}
 
 	// CREATE THE FLIGHT RESPONSE DTO
 	createdFlight, err = f.flightRepo.GetByCode(flightCode)
 	if err != nil {
-		return nil, exceptions.NewAppError(exceptions.BAD_REQUEST, "Failed to retrieve created flight", err)
+		return nil, exceptions.Internal("failed to get created flight by code", err)
 	}
 	// Map the created intermediate stops to DTOs
 	intermediateStopDTOs := make([]dto.IntermediateStopDTO, len(createdFlight.IntermediateStops))

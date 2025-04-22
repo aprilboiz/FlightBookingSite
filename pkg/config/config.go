@@ -69,7 +69,7 @@ func loadConfig() {
 
 	yamlFile, err := os.ReadFile(filePath)
 	if err != nil {
-		// Use Fatalf for critical config loading errors - app likely can't run.
+		// Use Fatalf for critical config loading exceptions - app likely can't run.
 		log.Fatalf("CRITICAL: Error reading config file '%s': %v", filePath, err)
 	}
 

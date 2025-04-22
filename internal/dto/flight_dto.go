@@ -25,7 +25,7 @@ type FlightResponse struct {
 	BasePrice         float64               `json:"base_price"`
 	DepartureDateTime string                `json:"departure_date"`
 	PlaneCode         string                `json:"plane_code"`
-	IntermediateStop  []IntermediateStopDTO `json:"intermediate_stop"`
+	IntermediateStop  []IntermediateStopDTO `json:"intermediate_stops"`
 }
 
 type FlightResponseInList struct {

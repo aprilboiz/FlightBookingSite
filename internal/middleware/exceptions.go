@@ -46,17 +46,30 @@ func ErrorHandler(logger *zap.Logger) gin.HandlerFunc {
 
 			var appErr *e.AppError
 			if errors.As(err, &appErr) {
-				errorInfo := e.ResolveErrorType(appErr.Type)
-
+				// Use the status code directly from the AppError
 				details := appErr.Details
-				if appErr.Type == e.INTERNAL_ERROR {
+
+				// Hide details for internal errors
+				if appErr.Code == e.INTERNAL_ERROR {
 					details = nil
 				}
-				response := e.NewErrorResponse(errorInfo.StatusCode, errorInfo.Title, appErr.Message, details)
+
+				response := e.NewErrorResponse(
+					appErr.StatusCode,
+					appErr.Code,
+					appErr.Message,
+					details)
+
 				c.AbortWithStatusJSON(response.Status, response)
 				return
 			} else {
-				response := e.NewErrorResponse(http.StatusBadRequest, http.StatusText(http.StatusBadRequest), err.Error(), nil)
+				// Default to bad request for non-AppError errors
+				response := e.NewErrorResponse(
+					http.StatusBadRequest,
+					e.BAD_REQUEST,
+					err.Error(),
+					nil)
+
 				c.AbortWithStatusJSON(response.Status, response)
 				return
 			}

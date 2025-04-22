@@ -7,7 +7,7 @@ import (
 
 type FlightService interface {
 	GetAllFlights() ([]*dto.FlightResponse, error)
-	GetFlightByID(flightID string) (*dto.FlightResponse, error)
+	GetFlightByID(flightID int) (*dto.FlightResponse, error)
 	GetFlightByCode(flightCode string) (*dto.FlightResponse, error)
 	Create(flightRequest *dto.FlightRequest) (*dto.FlightResponse, error)
 	Update(flightCode string, flightRequest *dto.FlightRequest) (*dto.FlightResponse, error)

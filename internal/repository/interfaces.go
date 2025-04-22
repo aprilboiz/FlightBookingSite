@@ -1,7 +1,16 @@
 package repository
 
 import (
+	"errors"
+	"fmt"
 	"github.com/aprilboiz/flight-management/internal/models"
+)
+
+var (
+	ErrNotFound        = errors.New("entity not found")
+	ErrAlreadyExists   = errors.New("entity already exists")
+	ErrFailedOperation = errors.New("repository operation failed")
+	ErrInvalidArgument = errors.New("invalid repository argument")
 )
 
 type FlightRepository interface {
@@ -28,4 +37,12 @@ type PlaneRepository interface {
 type TicketClassRepository interface {
 	GetByName(name string) (*models.TicketClass, error)
 	GetByNames(names []string) (map[string]*models.TicketClass, error)
+}
+
+type FlightCodeGenerator interface {
+	Generate() (string, error)
+}
+
+func WrapError(baseErr error, msg string) error {
+	return fmt.Errorf("%s: %w", msg, baseErr)
 }

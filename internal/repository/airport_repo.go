@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"errors"
 	"github.com/aprilboiz/flight-management/internal/exceptions"
 	"github.com/aprilboiz/flight-management/internal/models"
 	"gorm.io/gorm"
@@ -15,32 +16,40 @@ func NewAirportRepository(db *gorm.DB) AirportRepository {
 }
 
 func (a airportRepository) GetAll() ([]*models.Airport, error) {
-	flights := make([]*models.Airport, 0)
-	result := a.db.Find(&flights)
-	if result.Error != nil {
-		return nil, result.Error
+	airports := make([]*models.Airport, 0)
+
+	if err := a.db.Find(&airports).Error; err != nil {
+		return nil, exceptions.Internal("failed to get all airports", err)
 	}
-	return flights, nil
+
+	return airports, nil
 }
 
 func (a airportRepository) GetByCode(code string) (*models.Airport, error) {
 	var flight models.Airport
 	result := a.db.Where("airport_code = ?", code).First(&flight)
+
 	if result.Error != nil {
-		return nil, exceptions.NewAppError(exceptions.NOT_FOUND, "Airport with code "+code+" not found", nil)
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return nil, exceptions.NotFound("airport", code)
+		}
+		return nil, exceptions.Internal("failed to get airport by code", result.Error)
 	}
 	return &flight, nil
 }
 
 func (a airportRepository) GetByCodes(codes []string) (map[string]*models.Airport, error) {
-	flights := make([]*models.Airport, 0)
-	result := a.db.Where("airport_code IN ?", codes).Find(&flights)
+	airports := make([]*models.Airport, 0, len(codes))
+	result := a.db.Where("airport_code IN ?", codes).Find(&airports)
+
 	if result.Error != nil {
-		return nil, exceptions.NewAppError(exceptions.NOT_FOUND, result.Error.Error(), nil)
+		return nil, exceptions.Internal("failed to get airports by codes", result.Error)
 	}
-	airportMap := make(map[string]*models.Airport)
-	for _, flight := range flights {
-		airportMap[flight.AirportCode] = flight
+
+	airportMap := make(map[string]*models.Airport, len(airports))
+	for _, airport := range airports {
+		airportMap[airport.AirportCode] = airport
 	}
+
 	return airportMap, nil
 }
