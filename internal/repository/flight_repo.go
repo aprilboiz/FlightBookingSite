@@ -70,7 +70,7 @@ func (f flightRepository) GetByCode(code string) (*models.Flight, error) {
 func (f flightRepository) Create(flight *models.Flight) (*models.Flight, error) {
 	result := f.db.Create(flight)
 	if result.Error != nil {
-		return nil, WrapError(ErrFailedOperation, "failed to create flight")
+		return nil, exceptions.Internal("failed to create flight", result.Error)
 	}
 	return flight, nil
 }

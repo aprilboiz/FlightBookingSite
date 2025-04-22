@@ -3,7 +3,6 @@ package exceptions
 import (
 	"fmt"
 	"github.com/aprilboiz/flight-management/internal/dto"
-	"net/http"
 )
 
 type ErrorInfo struct {
@@ -29,28 +28,41 @@ func (e *AppError) Unwrap() error {
 	return e.Err
 }
 
-func NotFound(entity string, identifier string) *AppError {
+func NewAppError(errType, message string, details interface{}) *AppError {
+	errInfo := ResolveErrorType(errType)
 	return &AppError{
-		Code:       NOT_FOUND,
+		Code:       errInfo.Title,
+		Message:    message,
+		Details:    details,
+		StatusCode: errInfo.StatusCode,
+	}
+}
+
+func NotFound(entity string, identifier string) *AppError {
+	errInfo := ResolveErrorType(NOT_FOUND)
+	return &AppError{
+		Code:       errInfo.Title,
 		Message:    fmt.Sprintf("%s with identifier '%s' not found", entity, identifier),
-		StatusCode: http.StatusNotFound,
+		StatusCode: errInfo.StatusCode,
 	}
 }
 
 func BadRequest(message string, err error) *AppError {
+	errInfo := ResolveErrorType(BAD_REQUEST)
 	return &AppError{
-		Code:       BAD_REQUEST,
+		Code:       errInfo.Title,
 		Message:    message,
-		StatusCode: http.StatusBadRequest,
+		StatusCode: errInfo.StatusCode,
 		Err:        err,
 	}
 }
 
 func Internal(message string, err error) *AppError {
+	errInfo := ResolveErrorType(INTERNAL_ERROR)
 	return &AppError{
-		Code:       INTERNAL_ERROR,
+		Code:       errInfo.Title,
 		Message:    message,
-		StatusCode: http.StatusInternalServerError,
+		StatusCode: errInfo.StatusCode,
 		Err:        err,
 	}
 }
