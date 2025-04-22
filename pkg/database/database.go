@@ -124,22 +124,6 @@ func GetSequenceNameForTable(table string, column string) (string, error) {
 	return sequenceName, err
 }
 
-func GetNextValSequence(table string, column string) (uint, error) {
-	var nextVal uint
-	sequence, err := GetSequenceNameForTable(table, column)
-	if err != nil {
-		zap.L().Error("Error getting sequence name for table", zap.String("table", table), zap.Error(err))
-		return 0, err
-	}
-	db := database
-	err = db.Raw("SELECT nextval($1)", sequence).Scan(&nextVal).Error
-	if err != nil {
-		zap.L().Error("Error getting next sequence value for table", zap.String("table", table), zap.Error(err))
-		return 0, err
-	}
-	return nextVal, nil
-}
-
 func runSQLScript(sqlFilePath string) error {
 	// Read the SQL file
 	sqlBytes, err := os.ReadFile(sqlFilePath)
@@ -161,4 +145,19 @@ func runSQLScript(sqlFilePath string) error {
 
 	zap.L().Info("SQL script executed successfully")
 	return nil
+}
+
+func PeekUpcomingFlightId() (uint, error) {
+	db := database
+	var maxId uint
+
+	// Query the maximum ID currently in the flights table
+	err := db.Raw("SELECT COALESCE(MAX(id), 0) FROM flights").Scan(&maxId).Error
+	if err != nil {
+		zap.L().Error("Error getting max flight ID", zap.Error(err))
+		return 0, err
+	}
+
+	// Return max+1 as the next ID
+	return maxId + 1, nil
 }

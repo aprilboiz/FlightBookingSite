@@ -19,31 +19,36 @@ func NewFlightHandler(flightService service.FlightService) FlightHandler {
 func (f flightHandler) GetAllFlights(c *gin.Context) {
 	flights, err := f.flightService.GetAllFlights()
 	if err != nil {
-		_ = c.Error(e.NewAppError(e.BAD_REQUEST, err.Error(), nil))
+		_ = c.Error(err)
 		return
 	}
 	c.JSON(http.StatusOK, flights)
 }
 
 func (f flightHandler) GetFlightByCode(c *gin.Context) {
-	//TODO implement me
-	panic("implement me")
+	code := c.Param("code")
+	flight, err := f.flightService.GetFlightByCode(code)
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+	c.JSON(http.StatusOK, flight)
 }
 
 func (f flightHandler) CreateFlight(c *gin.Context) {
 	validatedModel, exists := c.Get("validatedModel")
 	if !exists {
-		_ = c.Error(e.NewAppError(e.BAD_REQUEST, "validated model not found", nil))
+		_ = c.Error(e.NewAppError(e.INTERNAL_ERROR, "Cannot find validated model in context", nil))
 		return
 	}
 	flightRequest, ok := validatedModel.(*dto.FlightRequest)
 	if !ok {
-		_ = c.Error(e.NewAppError(e.BAD_REQUEST, "invalid flight request body", nil))
+		_ = c.Error(e.NewAppError(e.INTERNAL_ERROR, "Cannot cast validated model to FlightRequest", nil))
 		return
 	}
 	flightResponse, err := f.flightService.Create(flightRequest)
 	if err != nil {
-		_ = c.Error(e.NewAppError(e.BAD_REQUEST, err.Error(), nil))
+		_ = c.Error(err)
 		return
 	}
 	c.JSON(http.StatusCreated, flightResponse)

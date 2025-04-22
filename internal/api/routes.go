@@ -7,6 +7,7 @@ import (
 	"github.com/aprilboiz/flight-management/internal/middleware"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
+	"net/http"
 )
 
 type Handlers struct {
@@ -20,10 +21,15 @@ func SetupRoutes(router *gin.Engine, h Handlers) {
 	// router.Use(middleware.Cors())
 	router.Use(middleware.ErrorHandler(h.Logger))
 	router.NoRoute(func(c *gin.Context) {
-		_ = c.Error(ex.NewAppError(ex.NOT_FOUND, "Not found this route!", map[string]any{
-			"path":   c.Request.URL.Path,
-			"method": c.Request.Method,
-		}))
+		_ = c.Error(&ex.AppError{
+			Code:    http.StatusText(http.StatusNotFound),
+			Message: "Cannot find the requested resource. Please check your request path.",
+			Details: map[string]any{
+				"path":   c.Request.URL.Path,
+				"method": c.Request.Method,
+			},
+			StatusCode: http.StatusMethodNotAllowed,
+		})
 	})
 	v1 := router.Group("/api/v1")
 

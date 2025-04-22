@@ -7,6 +7,7 @@ import (
 	"github.com/aprilboiz/flight-management/internal/exceptions"
 	"github.com/aprilboiz/flight-management/internal/models"
 	"github.com/aprilboiz/flight-management/internal/repository"
+	"github.com/aprilboiz/flight-management/pkg/config"
 	"github.com/aprilboiz/flight-management/pkg/database"
 	"time"
 )
@@ -25,15 +26,12 @@ func NewFlightCodeGenerator() FlightCodeGenerator {
 }
 
 func (g *flightCodeGenerator) Generate() (string, error) {
-	// Get the latest flight ID from the database
-	// Assuming you have a sequence or can get the max ID
-	nextID, err := database.GetNextValSequence("flights", "id")
+	nextID, err := database.PeekUpcomingFlightId()
 	if err != nil {
 		return "", exceptions.Internal("failed to get next ID", err)
 	}
 
 	// Format the ID to have leading zeros up to 4 digits
-	// e.g., 1 -> "0001", 10 -> "0010", 100 -> "0100", 1000 -> "1000"
 	formattedID := fmt.Sprintf("%04d", nextID)
 
 	// Prefix with company name
@@ -78,10 +76,10 @@ func (f flightService) GetAllFlights() ([]*dto.FlightResponse, error) {
 			BasePrice:         flight.BasePrice,
 			DepartureDateTime: flight.DepartureDateTime.Format(time.RFC3339),
 			PlaneCode:         flight.Plane.PlaneCode,
+			IntermediateStop:  make([]dto.IntermediateStopDTO, len(flight.IntermediateStops)),
 		}
-		intermediateStops := make([]dto.IntermediateStopDTO, len(flight.IntermediateStops))
 		for j, stop := range flight.IntermediateStops {
-			intermediateStops[j] = dto.IntermediateStopDTO{
+			flightResponses[i].IntermediateStop[j] = dto.IntermediateStopDTO{
 				StopAirport:  stop.Airport.AirportCode,
 				StopDuration: stop.StopDuration,
 				StopOrder:    stop.StopOrder,
@@ -200,7 +198,8 @@ func (f flightService) Create(flightRequest *dto.FlightRequest) (*dto.FlightResp
 		}
 		return nil, exceptions.Internal("failed to get arrival airport by code", err)
 	}
-	departureDateTime, err := time.Parse(time.DateTime, flightRequest.DepartureDateTime)
+	loc, _ := time.LoadLocation(config.GetConfig().Database.Timezone)
+	departureDateTime, err := time.ParseInLocation(time.DateTime, flightRequest.DepartureDateTime, loc)
 	if err != nil {
 		var appErr *exceptions.AppError
 		if errors.As(err, &appErr) {
@@ -255,7 +254,7 @@ func (f flightService) Create(flightRequest *dto.FlightRequest) (*dto.FlightResp
 	}
 
 	// CREATE THE FLIGHT RESPONSE DTO
-	createdFlight, err = f.flightRepo.GetByCode(flightCode)
+	createdFlight, err = f.flightRepo.GetByCode(createdFlight.FlightCode)
 	if err != nil {
 		return nil, exceptions.Internal("failed to get created flight by code", err)
 	}
