@@ -226,31 +226,33 @@ func (f flightService) Create(flightRequest *dto.FlightRequest) (*dto.FlightResp
 		return nil, exceptions.Internal("failed to create flight", err)
 	}
 
-	intermediateStops := make([]*models.IntermediateStop, len(flightRequest.IntermediateStop))
-	for i, stop := range flightRequest.IntermediateStop {
-		airport, err := f.airportRepo.GetByCode(stop.StopAirport)
+	if len(flightRequest.IntermediateStop) != 0 {
+		intermediateStops := make([]*models.IntermediateStop, len(flightRequest.IntermediateStop))
+		for i, stop := range flightRequest.IntermediateStop {
+			airport, err := f.airportRepo.GetByCode(stop.StopAirport)
+			if err != nil {
+				var appErr *exceptions.AppError
+				if errors.As(err, &appErr) {
+					return nil, appErr
+				}
+				return nil, exceptions.Internal("failed to get intermediate airport by code", err)
+			}
+			intermediateStops[i] = &models.IntermediateStop{
+				FlightID:     createdFlight.ID,
+				AirportID:    airport.ID,
+				StopDuration: stop.StopDuration,
+				StopOrder:    stop.StopOrder,
+				Note:         stop.Note,
+			}
+		}
+		_, err = f.flightRepo.CreateIntermediateStops(intermediateStops)
 		if err != nil {
 			var appErr *exceptions.AppError
 			if errors.As(err, &appErr) {
 				return nil, appErr
 			}
-			return nil, exceptions.Internal("failed to get intermediate airport by code", err)
+			return nil, exceptions.Internal("failed to create intermediate stops", err)
 		}
-		intermediateStops[i] = &models.IntermediateStop{
-			FlightID:     createdFlight.ID,
-			AirportID:    airport.ID,
-			StopDuration: stop.StopDuration,
-			StopOrder:    stop.StopOrder,
-			Note:         stop.Note,
-		}
-	}
-	_, err = f.flightRepo.CreateIntermediateStops(intermediateStops)
-	if err != nil {
-		var appErr *exceptions.AppError
-		if errors.As(err, &appErr) {
-			return nil, appErr
-		}
-		return nil, exceptions.Internal("failed to create intermediate stops", err)
 	}
 
 	// CREATE THE FLIGHT RESPONSE DTO
