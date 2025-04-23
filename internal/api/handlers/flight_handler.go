@@ -65,7 +65,7 @@ func (f flightHandler) GetFlightByCode(c *gin.Context) {
 // @Success 201 {object} dto.FlightResponse
 // @Failure 400 {object} dto.ErrorResponse
 // @Failure 500 {object} dto.ErrorResponse
-// @Router /flights [post]
+// @Router /api/flights [post]
 func (f flightHandler) CreateFlight(c *gin.Context) {
 	validatedModel, exists := c.Get("validatedModel")
 	if !exists {
@@ -97,7 +97,7 @@ func (f flightHandler) CreateFlight(c *gin.Context) {
 // @Failure 400 {object} dto.ErrorResponse
 // @Failure 404 {object} dto.ErrorResponse
 // @Failure 500 {object} dto.ErrorResponse
-// @Router /flights/{code} [put]
+// @Router /api/flights/{code} [put]
 func (f flightHandler) UpdateFlight(c *gin.Context) {
 	//TODO implement me
 	panic("implement me")
@@ -113,7 +113,7 @@ func (f flightHandler) UpdateFlight(c *gin.Context) {
 // @Success 204 "No Content"
 // @Failure 404 {object} dto.ErrorResponse
 // @Failure 500 {object} dto.ErrorResponse
-// @Router /flights/{code} [delete]
+// @Router /api/flights/{code} [delete]
 func (f flightHandler) DeleteFlightByCode(c *gin.Context) {
 	//TODO implement me
 	panic("implement me")

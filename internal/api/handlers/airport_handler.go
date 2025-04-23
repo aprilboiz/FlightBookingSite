@@ -25,7 +25,7 @@ type airportHandler struct {
 // @Produce json
 // @Success 200 {array} dto.AirportResponse
 // @Failure 500 {object} dto.ErrorResponse
-// @Router /airports [get]
+// @Router /api/airports [get]
 func (h *airportHandler) GetAllAirports(c *gin.Context) {
 	airports, err := h.airportService.GetAllAirports()
 	if err != nil {
@@ -45,7 +45,7 @@ func (h *airportHandler) GetAllAirports(c *gin.Context) {
 // @Success 200 {object} dto.AirportResponse
 // @Failure 404 {object} dto.ErrorResponse
 // @Failure 500 {object} dto.ErrorResponse
-// @Router /airports/{code} [get]
+// @Router /api/airports/{code} [get]
 func (h *airportHandler) GetAirportByCode(c *gin.Context) {
 	code := c.Param("code")
 	airport, err := h.airportService.GetAirportByCode(code)

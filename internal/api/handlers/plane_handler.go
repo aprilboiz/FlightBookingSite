@@ -22,7 +22,7 @@ type planeHandler struct {
 // @Produce json
 // @Success 200 {array} dto.PlaneResponse
 // @Failure 500 {object} dto.ErrorResponse
-// @Router /planes [get]
+// @Router /api/planes [get]
 func (h *planeHandler) GetAllPlanes(c *gin.Context) {
 	planes, err := h.planeService.GetAllPlanes()
 	if err != nil {
@@ -42,7 +42,7 @@ func (h *planeHandler) GetAllPlanes(c *gin.Context) {
 // @Success 200 {object} dto.PlaneResponse
 // @Failure 404 {object} dto.ErrorResponse
 // @Failure 500 {object} dto.ErrorResponse
-// @Router /planes/{code} [get]
+// @Router /api/planes/{code} [get]
 func (h *planeHandler) GetPlaneByCode(c *gin.Context) {
 	code := c.Param("code")
 	plane, err := h.planeService.GetPlaneByCode(code)
