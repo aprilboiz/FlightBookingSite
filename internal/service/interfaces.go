@@ -2,7 +2,6 @@ package service
 
 import (
 	"github.com/aprilboiz/flight-management/internal/dto"
-	"github.com/aprilboiz/flight-management/internal/models"
 )
 
 type FlightService interface {
@@ -15,9 +14,14 @@ type FlightService interface {
 }
 
 type AirportService interface {
-	GetAllAirports() ([]*models.Airport, error)
-	GetAirportByCode(code string) (*models.Airport, error)
-	GetAirportsByCodes(codes []string) (map[string]*models.Airport, error)
+	GetAllAirports() ([]*dto.AirportResponse, error)
+	GetAirportByCode(code string) (*dto.AirportResponse, error)
+	GetAirportsByCodes(codes []string) (map[string]*dto.AirportResponse, error)
+}
+
+type PlaneService interface {
+	GetAllPlanes() ([]*dto.PlaneResponse, error)
+	GetPlaneByCode(code string) (*dto.PlaneResponseDetails, error)
 }
 
 type FlightCodeGenerator interface {
