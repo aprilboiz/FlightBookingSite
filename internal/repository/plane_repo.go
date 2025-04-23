@@ -8,17 +8,29 @@ import (
 	"strconv"
 )
 
-type planeRepository struct {
-	db *gorm.DB
-}
-
 func NewPlaneRepository(db *gorm.DB) PlaneRepository {
 	return &planeRepository{db: db}
 }
 
+type planeRepository struct {
+	db *gorm.DB
+}
+
+func (p planeRepository) GetAll() ([]*models.Plane, error) {
+	planes := make([]*models.Plane, 0)
+
+	if err := p.db.Find(&planes).Error; err != nil {
+		return nil, exceptions.Internal("failed to get all planes", err)
+	}
+
+	return planes, nil
+}
+
 func (p planeRepository) GetByCode(code string) (*models.Plane, error) {
 	var plane models.Plane
-	result := p.db.Where("plane_code = ?", code).First(&plane)
+	result := p.db.Where("plane_code = ?", code).
+		Preload("Seats.TicketClass").
+		First(&plane)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 			return nil, exceptions.NotFound("plane", code)
