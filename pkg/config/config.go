@@ -9,9 +9,6 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-// Config struct mirrors the structure of your YAML file.
-// Fields must be exported (start with uppercase) to be accessible
-// outside this package.
 type Config struct {
 	Environment string         `yaml:"environment"`
 	Server      ServerConfig   `yaml:"server"`
@@ -46,16 +43,12 @@ type LoggingConfig struct {
 	OutputPath string `yaml:"output_path"`
 }
 
-// --- Singleton Implementation ---
-
 var (
 	cfg  *Config   // Private variable to hold the single instance
 	once sync.Once // Ensures initialization code runs only once
 )
 
 const (
-	// DefaultConfigPath defines the default location of the config file.
-	// You could make this configurable via env vars or flags if needed.
 	DefaultConfigPath = "pkg/config/config.yml"
 
 	EnvironmentProduction  = "production"
@@ -91,25 +84,10 @@ func GetConfig() *Config {
 	// Subsequent calls will skip loadConfig() but still return the cfg instance.
 	once.Do(loadConfig)
 
-	// If loadConfig panicked (due to Fatalf), the program would have already exited.
-	// If loadConfig potentially returned an error instead of panicking, you'd need
-	// additional checks here to ensure cfg is not nil.
 	if cfg == nil {
-		// This state should ideally be unreachable if loadConfig panics on failure.
 		log.Panicln("CRITICAL: Configuration accessed before successful loading or loading failed without panic.")
 	}
 	return cfg
-}
-
-// --- Optional: Convenience Getters (Example) ---
-// You can add functions to directly access specific parts of the config
-
-func GetServerPort() int {
-	return GetConfig().Server.Port
-}
-
-func GetDatabaseName() string {
-	return GetConfig().Database.Name
 }
 
 func GetDatabaseConnectionString() string {

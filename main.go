@@ -1,6 +1,11 @@
 package main
 
 import (
+	"fmt"
+	"github.com/aprilboiz/flight-management/pkg/config"
+	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
 	"github.com/aprilboiz/flight-management/internal/api"
@@ -15,10 +20,40 @@ import (
 	"go.uber.org/zap"
 )
 
+// @title Flight Management API
+// @version 1.0
+// @description API for flight management system
+// @termsOfService http://swagger.io/terms/
+
+// @contact.name API Support
+// @contact.url http://www.ruaairline.com/support
+// @contact.email support@ruaairline.com
+
+// @license.name Apache 2.0
+// @license.url http://www.apache.org/licenses/LICENSE-2.0.html
+
+// @host localhost:8080
+// @BasePath /api
+// @schemes http https
+
 func main() {
 	// Initialize logger
-	logger.Init("development")
+	logger.Init(config.GetConfig().Environment)
 	log := logger.Get()
+
+	// Set up clean shutdown
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
+
+	go func() {
+		<-c
+		fmt.Println("Shutting down...")
+		err := logger.Sync()
+		if err != nil {
+			return
+		}
+		os.Exit(0)
+	}()
 
 	log.Info("Setting up the application")
 
@@ -40,7 +75,7 @@ func main() {
 	airportHandler := handlers.NewAirportHandler(airportService)
 	planeHandler := handlers.NewPlaneHandler(planeService)
 
-	handlers := api.Handlers{
+	h := api.Handlers{
 		AirportHandler: airportHandler,
 		PlaneHandler:   planeHandler,
 		FlightHandler:  flightHandler,
@@ -61,7 +96,7 @@ func main() {
 	}))
 
 	// Setup routes
-	api.SetupRoutes(router, handlers)
+	api.SetupRoutes(router, h)
 
 	// Start server
 	log.Info("Running the server on port 8080")

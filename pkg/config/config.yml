@@ -15,7 +15,7 @@ database:
     max_connections: 10
     idle_connections: 5
   init:
-    seed_path: ./pkg/database/seed_data.sql
+    seed_path: "./pkg/database/seed_data.sql"
     run_seed: true
 
 logging:
