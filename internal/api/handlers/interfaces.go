@@ -11,3 +11,13 @@ type FlightHandler interface {
 	UpdateFlight(c *gin.Context)
 	DeleteFlightByCode(c *gin.Context)
 }
+
+type PlaneHandler interface {
+	GetAllPlanes(c *gin.Context)
+	GetPlaneByCode(c *gin.Context)
+}
+
+type AirportHandler interface {
+	GetAllAirports(c *gin.Context)
+	GetAirportByCode(c *gin.Context)
+}

@@ -30,6 +30,7 @@ type AirportRepository interface {
 }
 
 type PlaneRepository interface {
+	GetAll() ([]*models.Plane, error)
 	GetByID(id uint) (*models.Plane, error)
 	GetByCode(code string) (*models.Plane, error)
 }

@@ -1,0 +1,342 @@
+basePath: /api
+definitions:
+  dto.AirportResponse:
+    properties:
+      airport_code:
+        type: string
+      airport_name:
+        type: string
+      city_name:
+        type: string
+      country_name:
+        type: string
+    type: object
+  dto.ErrorResponse:
+    properties:
+      details: {}
+      message:
+        type: string
+      status:
+        type: integer
+      type:
+        type: string
+    type: object
+  dto.FlightRequest:
+    properties:
+      arrival_airport:
+        type: string
+      base_price:
+        type: number
+      departure_airport:
+        type: string
+      departure_date:
+        type: string
+      duration:
+        type: integer
+      intermediate_stops:
+        items:
+          $ref: '#/definitions/dto.IntermediateStopDTO'
+        type: array
+      plane_code:
+        type: string
+    type: object
+  dto.FlightResponse:
+    properties:
+      arrival_airport:
+        type: string
+      base_price:
+        type: number
+      departure_airport:
+        type: string
+      departure_date:
+        type: string
+      duration:
+        type: integer
+      flight_code:
+        type: string
+      intermediate_stops:
+        items:
+          $ref: '#/definitions/dto.IntermediateStopDTO'
+        type: array
+      plane_code:
+        type: string
+    type: object
+  dto.IntermediateStopDTO:
+    properties:
+      note:
+        type: string
+      stop_airport:
+        type: string
+      stop_duration:
+        type: integer
+      stop_order:
+        type: integer
+    type: object
+  dto.PlaneResponse:
+    properties:
+      plane_code:
+        type: string
+      plane_name:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: support@ruaairline.com
+    name: API Support
+    url: http://www.ruaairline.com/support
+  description: API for flight management system
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: Flight Management API
+  version: "1.0"
+paths:
+  /airports:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a list of all airports
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/dto.AirportResponse'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Get all airports
+      tags:
+      - airports
+  /airports/{code}:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve an airport by its unique code
+      parameters:
+      - description: Airport Code
+        in: path
+        name: code
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.AirportResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Get airport by code
+      tags:
+      - airports
+  /flights:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a list of all flights
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/dto.FlightResponse'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Get all flights
+      tags:
+      - flights
+    post:
+      consumes:
+      - application/json
+      description: Create a new flight with the provided information
+      parameters:
+      - description: Flight information
+        in: body
+        name: flight
+        required: true
+        schema:
+          $ref: '#/definitions/dto.FlightRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dto.FlightResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Create a new flight
+      tags:
+      - flights
+  /flights/{code}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a flight by its unique code
+      parameters:
+      - description: Flight Code
+        in: path
+        name: code
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Delete a flight
+      tags:
+      - flights
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a flight by its unique code
+      parameters:
+      - description: Flight Code
+        in: path
+        name: code
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.FlightResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Get flight by code
+      tags:
+      - flights
+    put:
+      consumes:
+      - application/json
+      description: Update an existing flight with the provided information
+      parameters:
+      - description: Flight Code
+        in: path
+        name: code
+        required: true
+        type: string
+      - description: Flight information
+        in: body
+        name: flight
+        required: true
+        schema:
+          $ref: '#/definitions/dto.FlightRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.FlightResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Update a flight
+      tags:
+      - flights
+  /planes:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a list of all planes
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/dto.PlaneResponse'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Get all planes
+      tags:
+      - planes
+  /planes/{code}:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a plane by its unique code
+      parameters:
+      - description: Plane Code
+        in: path
+        name: code
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.PlaneResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Get plane by code
+      tags:
+      - planes
+schemes:
+- http
+- https
+swagger: "2.0"

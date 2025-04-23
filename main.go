@@ -11,6 +11,22 @@ import (
 	"go.uber.org/zap"
 )
 
+// @title Flight Management API
+// @version 1.0
+// @description API for flight management system
+// @termsOfService http://swagger.io/terms/
+
+// @contact.name API Support
+// @contact.url http://www.ruaairline.com/support
+// @contact.email support@ruaairline.com
+
+// @license.name Apache 2.0
+// @license.url http://www.apache.org/licenses/LICENSE-2.0.html
+
+// @host localhost:8080
+// @BasePath /api
+// @schemes http https
+
 func main() {
 	logger.Init("development")
 	log := logger.Get()
@@ -25,13 +41,19 @@ func main() {
 
 	// Declare services
 	flightService := service.NewFlightService(flightRepo, airportRepo, planeRepo)
+	airportService := service.NewAirportService(airportRepo)
+	planeService := service.NewPlaneService(planeRepo)
 
 	// Declare handlers
 	flightHandler := handlers.NewFlightHandler(flightService)
+	airportHandler := handlers.NewAirportHandler(airportService)
+	planeHandler := handlers.NewPlaneHandler(planeService)
 
 	h := api.Handlers{
-		FlightHandler: flightHandler,
-		Logger:        log,
+		AirportHandler: airportHandler,
+		PlaneHandler:   planeHandler,
+		FlightHandler:  flightHandler,
+		Logger:         log,
 	}
 	router := gin.Default()
 	api.SetupRoutes(router, h)
