@@ -80,5 +80,5 @@ DO $$
     END$$;
 
 -- Inserting data into the Configuration table
-INSERT INTO configurations (number_of_airports, min_flight_duration, max_intermediate_stops, min_intermediate_stop_duration, max_intermediate_stop_duration, max_ticket_classes, latest_ticket_purchase_time, ticket_cancellation_time, created_at, updated_at) VALUES
+INSERT INTO parameters (number_of_airports, min_flight_duration, max_intermediate_stops, min_intermediate_stop_duration, max_intermediate_stop_duration, max_ticket_classes, latest_ticket_purchase_time, ticket_cancellation_time, created_at, updated_at) VALUES
     (10, 30, 2, 10, 20, 2, 1440, 0, NOW(), NOW());

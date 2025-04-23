@@ -84,7 +84,7 @@ type Ticket struct {
 	Seat   Seat   `gorm:"foreignKey:SeatID;references:ID"`
 }
 
-type Configuration struct {
+type Parameter struct {
 	gorm.Model
 	NumberOfAirports            int `gorm:"not null"`
 	MinFlightDuration           int `gorm:"not null"`
