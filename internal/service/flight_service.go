@@ -13,6 +13,7 @@ import (
 )
 
 type flightService struct {
+	paramRepo   repository.ParameterRepository
 	flightRepo  repository.FlightRepository
 	airportRepo repository.AirportRepository
 	planeRepo   repository.PlaneRepository
@@ -40,12 +41,13 @@ func (g *flightCodeGenerator) Generate() (string, error) {
 	return flightCode, nil
 }
 
-func NewFlightService(flightRepo repository.FlightRepository, airportRepo repository.AirportRepository, planeRepo repository.PlaneRepository) FlightService {
+func NewFlightService(flightRepo repository.FlightRepository, airportRepo repository.AirportRepository, planeRepo repository.PlaneRepository, paramRepo repository.ParameterRepository) FlightService {
 
-	if flightRepo == nil || airportRepo == nil || planeRepo == nil {
+	if flightRepo == nil || airportRepo == nil || planeRepo == nil || paramRepo == nil {
 		panic("Missing required repositories for flight service")
 	}
 	return &flightService{
+		paramRepo:   paramRepo,
 		flightRepo:  flightRepo,
 		airportRepo: airportRepo,
 		planeRepo:   planeRepo,
@@ -161,6 +163,40 @@ func (f flightService) GetFlightByCode(flightCode string) (*dto.FlightResponse, 
 }
 
 func (f flightService) Create(flightRequest *dto.FlightRequest) (*dto.FlightResponse, error) {
+	params, err := f.paramRepo.GetAllParams()
+	if err != nil {
+		var appErr *exceptions.AppError
+		if errors.As(err, &appErr) {
+			return nil, appErr
+		}
+		return nil, exceptions.Internal("failed to get all params", err)
+	}
+
+	if flightRequest.DepartureAirport == flightRequest.ArrivalAirport {
+		return nil, exceptions.BadRequest("departure and arrival airports cannot be the same", nil)
+	}
+
+	if len(flightRequest.IntermediateStop) > 0 {
+		stopMap := make(map[string]bool)
+		if len(flightRequest.IntermediateStop) > params.MaxIntermediateStops {
+			return nil, exceptions.BadRequest(fmt.Sprintf("the max intermediate stops is %v", params.MaxIntermediateStops), nil)
+		}
+		for _, stop := range flightRequest.IntermediateStop {
+			if stopMap[stop.StopAirport] {
+				return nil, exceptions.BadRequest(fmt.Sprintf("the stop airport '%s' is duplicated", stop.StopAirport), nil)
+			}
+
+			if stop.StopDuration < params.MinIntermediateStopDuration || stop.StopDuration > params.MaxIntermediateStopDuration {
+				return nil, exceptions.BadRequest(fmt.Sprintf("the stop duration must be in range [%v, %v]", params.MinIntermediateStopDuration, params.MaxIntermediateStopDuration), nil)
+			}
+			stopMap[stop.StopAirport] = true
+		}
+	}
+
+	if flightRequest.Duration < params.MinFlightDuration {
+		return nil, exceptions.BadRequest(fmt.Sprintf("the min flight duration is %v", params.MinFlightDuration), nil)
+	}
+
 	flightCode, err := NewFlightCodeGenerator().Generate()
 	if err != nil {
 		var appErr *exceptions.AppError
