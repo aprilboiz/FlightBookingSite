@@ -13,7 +13,7 @@ type FlightRequest struct {
 type IntermediateStopDTO struct {
 	StopAirport  string `json:"stop_airport"`
 	StopDuration int    `json:"stop_duration"`
-	StopOrder    int    `json:"stop_order"`
+	StopOrder    int    `json:"stop_order,omitempty"`
 	Note         string `json:"note"`
 }
 

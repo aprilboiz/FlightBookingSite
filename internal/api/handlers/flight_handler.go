@@ -8,12 +8,17 @@ import (
 	"net/http"
 )
 
+func NewFlightHandler(flightService service.FlightService) FlightHandler {
+	return &flightHandler{flightService: flightService}
+}
+
 type flightHandler struct {
 	flightService service.FlightService
 }
 
-func NewFlightHandler(flightService service.FlightService) FlightHandler {
-	return &flightHandler{flightService: flightService}
+func (f flightHandler) GetAllFlightsInList(c *gin.Context) {
+	//TODO implement me
+	panic("implement me")
 }
 
 // GetAllFlights godoc
@@ -24,7 +29,7 @@ func NewFlightHandler(flightService service.FlightService) FlightHandler {
 // @Produce json
 // @Success 200 {array} dto.FlightResponse
 // @Failure 500 {object} dto.ErrorResponse
-// @Router /flights [get]
+// @Router /api/flights [get]
 func (f flightHandler) GetAllFlights(c *gin.Context) {
 	flights, err := f.flightService.GetAllFlights()
 	if err != nil {
@@ -44,7 +49,7 @@ func (f flightHandler) GetAllFlights(c *gin.Context) {
 // @Success 200 {object} dto.FlightResponse
 // @Failure 404 {object} dto.ErrorResponse
 // @Failure 500 {object} dto.ErrorResponse
-// @Router /flights/{code} [get]
+// @Router /api/flights/{code} [get]
 func (f flightHandler) GetFlightByCode(c *gin.Context) {
 	code := c.Param("code")
 	flight, err := f.flightService.GetFlightByCode(code)
