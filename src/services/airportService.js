@@ -11,3 +11,13 @@ export const getAirports = async () => {
         throw error;
     }
 }
+
+export const getAirportByCode = async (code) => {
+    try {
+        const response = await axios.get(`${API_BASE_URL}/airports/${code}`);
+        return response.data;
+    } catch (error) {
+        console.error("Error fetching airport by code:", error);
+        throw error;
+    }
+}
