@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { getAirports } from "../services/airportService.js";
 import {Form, Input, Typography, Select, InputNumber, Button, notification, DatePicker, Space, message,} from "antd";
 import dayjs from "dayjs";
@@ -13,6 +14,8 @@ const CalenderPlane = () => {
   const [airports, setAirports] = useState([]);
   const [planes, setPlanes] = useState([]);
   const [stopAirports, setStopAirports] = useState([]);
+
+  const navigate = useNavigate();
 
   const fetchAirports = async () => {
     try {
@@ -112,6 +115,7 @@ const CalenderPlane = () => {
         message: "Thành công",
         description: "Chuyến bay đã được thêm thành công",
       });
+      navigate("/list-plane")
     } catch (error) {
       notification.error({
         message: "Lỗi",
