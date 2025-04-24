@@ -24,7 +24,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/airports": {
+        "/api/airports": {
             "get": {
                 "description": "Retrieve a list of all airports",
                 "consumes": [
@@ -56,7 +56,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/airports/{code}": {
+        "/api/airports/{code}": {
             "get": {
                 "description": "Retrieve an airport by its unique code",
                 "consumes": [
@@ -100,7 +100,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/flights": {
+        "/api/flights": {
             "get": {
                 "description": "Retrieve a list of all flights",
                 "consumes": [
@@ -176,7 +176,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/flights/{code}": {
+        "/api/flights/{code}": {
             "get": {
                 "description": "Retrieve a flight by its unique code",
                 "consumes": [
@@ -316,7 +316,80 @@ const docTemplate = `{
                 }
             }
         },
-        "/planes": {
+        "/api/parameters": {
+            "get": {
+                "description": "Retrieve a list of all parameters",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "parameters"
+                ],
+                "summary": "Get all the parameters",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.Parameter"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Update all parameters",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "parameters"
+                ],
+                "summary": "Update parameters",
+                "parameters": [
+                    {
+                        "description": "Parameter information",
+                        "name": "flight",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.Parameter"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.Parameter"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/planes": {
             "get": {
                 "description": "Retrieve a list of all planes",
                 "consumes": [
@@ -348,7 +421,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/planes/{code}": {
+        "/api/planes/{code}": {
             "get": {
                 "description": "Retrieve a plane by its unique code",
                 "consumes": [
@@ -512,6 +585,35 @@ const docTemplate = `{
                 },
                 "plane_name": {
                     "type": "string"
+                }
+            }
+        },
+        "models.Parameter": {
+            "type": "object",
+            "properties": {
+                "latest_ticket_purchase_time": {
+                    "type": "integer"
+                },
+                "max_intermediate_stop_duration": {
+                    "type": "integer"
+                },
+                "max_intermediate_stops": {
+                    "type": "integer"
+                },
+                "max_ticket_classes": {
+                    "type": "integer"
+                },
+                "min_flight_duration": {
+                    "type": "integer"
+                },
+                "min_intermediate_stop_duration": {
+                    "type": "integer"
+                },
+                "number_of_airports": {
+                    "type": "integer"
+                },
+                "ticket_cancellation_time": {
+                    "type": "integer"
                 }
             }
         }

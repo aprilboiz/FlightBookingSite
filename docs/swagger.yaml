@@ -79,6 +79,25 @@ definitions:
       plane_name:
         type: string
     type: object
+  models.Parameter:
+    properties:
+      latest_ticket_purchase_time:
+        type: integer
+      max_intermediate_stop_duration:
+        type: integer
+      max_intermediate_stops:
+        type: integer
+      max_ticket_classes:
+        type: integer
+      min_flight_duration:
+        type: integer
+      min_intermediate_stop_duration:
+        type: integer
+      number_of_airports:
+        type: integer
+      ticket_cancellation_time:
+        type: integer
+    type: object
 host: localhost:8080
 info:
   contact:
@@ -93,7 +112,7 @@ info:
   title: Flight Management API
   version: "1.0"
 paths:
-  /airports:
+  /api/airports:
     get:
       consumes:
       - application/json
@@ -114,7 +133,7 @@ paths:
       summary: Get all airports
       tags:
       - airports
-  /airports/{code}:
+  /api/airports/{code}:
     get:
       consumes:
       - application/json
@@ -143,7 +162,7 @@ paths:
       summary: Get airport by code
       tags:
       - airports
-  /flights:
+  /api/flights:
     get:
       consumes:
       - application/json
@@ -193,7 +212,7 @@ paths:
       summary: Create a new flight
       tags:
       - flights
-  /flights/{code}:
+  /api/flights/{code}:
     delete:
       consumes:
       - application/json
@@ -286,7 +305,55 @@ paths:
       summary: Update a flight
       tags:
       - flights
-  /planes:
+  /api/parameters:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a list of all parameters
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Parameter'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Get all the parameters
+      tags:
+      - parameters
+    put:
+      consumes:
+      - application/json
+      description: Update all parameters
+      parameters:
+      - description: Parameter information
+        in: body
+        name: flight
+        required: true
+        schema:
+          $ref: '#/definitions/models.Parameter'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Parameter'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Update parameters
+      tags:
+      - parameters
+  /api/planes:
     get:
       consumes:
       - application/json
@@ -307,7 +374,7 @@ paths:
       summary: Get all planes
       tags:
       - planes
-  /planes/{code}:
+  /api/planes/{code}:
     get:
       consumes:
       - application/json
