@@ -1,11 +1,7 @@
 package main
 
 import (
-	"fmt"
 	"github.com/aprilboiz/flight-management/pkg/config"
-	"os"
-	"os/signal"
-	"syscall"
 	"time"
 
 	"github.com/aprilboiz/flight-management/internal/api"
@@ -40,20 +36,12 @@ func main() {
 	// Initialize logger
 	logger.Init(config.GetConfig().Environment)
 	log := logger.Get()
-
-	// Set up clean shutdown
-	c := make(chan os.Signal, 1)
-	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
-
-	go func() {
-		<-c
-		fmt.Println("Shutting down...")
-		err := logger.Sync()
+	defer func(log *zap.Logger) {
+		err := log.Sync()
 		if err != nil {
-			return
+			log.Error("Failed to sync logger", zap.Error(err))
 		}
-		os.Exit(0)
-	}()
+	}(log)
 
 	log.Info("Setting up the application")
 
@@ -61,25 +49,29 @@ func main() {
 	db := database.GetDatabase()
 
 	// Repositories
+	paramRepo := repository.NewParameterRepository(db)
 	flightRepo := repository.NewFlightRepository(db)
 	airportRepo := repository.NewAirportRepository(db)
 	planeRepo := repository.NewPlaneRepository(db)
 
 	// Services
-	flightService := service.NewFlightService(flightRepo, airportRepo, planeRepo)
+	paramService := service.NewParamService(paramRepo)
+	flightService := service.NewFlightService(flightRepo, airportRepo, planeRepo, paramRepo)
 	airportService := service.NewAirportService(airportRepo)
 	planeService := service.NewPlaneService(planeRepo)
 
 	// Handlers
+	paramHandler := handlers.NewParameterHandler(paramService)
 	flightHandler := handlers.NewFlightHandler(flightService)
 	airportHandler := handlers.NewAirportHandler(airportService)
 	planeHandler := handlers.NewPlaneHandler(planeService)
 
 	h := api.Handlers{
-		AirportHandler: airportHandler,
-		PlaneHandler:   planeHandler,
-		FlightHandler:  flightHandler,
-		Logger:         log,
+		ParameterHandler: paramHandler,
+		AirportHandler:   airportHandler,
+		PlaneHandler:     planeHandler,
+		FlightHandler:    flightHandler,
+		Logger:           log,
 	}
 
 	// Create Gin router

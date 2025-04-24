@@ -6,6 +6,7 @@ import (
 	"github.com/aprilboiz/flight-management/internal/dto"
 	ex "github.com/aprilboiz/flight-management/internal/exceptions"
 	"github.com/aprilboiz/flight-management/internal/middleware"
+	"github.com/aprilboiz/flight-management/internal/models"
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -14,10 +15,11 @@ import (
 )
 
 type Handlers struct {
-	AirportHandler handlers.AirportHandler
-	PlaneHandler   handlers.PlaneHandler
-	FlightHandler  handlers.FlightHandler
-	Logger         *zap.Logger
+	ParameterHandler handlers.ParameterHandler
+	AirportHandler   handlers.AirportHandler
+	PlaneHandler     handlers.PlaneHandler
+	FlightHandler    handlers.FlightHandler
+	Logger           *zap.Logger
 }
 
 func SetupRoutes(router *gin.Engine, h Handlers) {
@@ -45,7 +47,7 @@ func SetupRoutes(router *gin.Engine, h Handlers) {
 			flightRoutes.POST("", middleware.ValidateRequest(&dto.FlightRequest{}), h.FlightHandler.CreateFlight)
 			flightRoutes.GET("", h.FlightHandler.GetAllFlights)
 			flightRoutes.GET("/:code", h.FlightHandler.GetFlightByCode)
-			flightRoutes.PUT("/:code", h.FlightHandler.UpdateFlight)
+			flightRoutes.PUT("/:code", middleware.ValidateRequest(&dto.FlightRequest{}), h.FlightHandler.UpdateFlight)
 			flightRoutes.DELETE("/:code", h.FlightHandler.DeleteFlightByCode)
 		}
 
@@ -58,7 +60,13 @@ func SetupRoutes(router *gin.Engine, h Handlers) {
 		airportRoutes := v1.Group("/airports")
 		{
 			airportRoutes.GET("", h.AirportHandler.GetAllAirports)
-			airportRoutes.GET("?:code", h.AirportHandler.GetAirportByCode)
+			airportRoutes.GET("/:code", h.AirportHandler.GetAirportByCode)
+		}
+
+		paramHandler := v1.Group("/params")
+		{
+			paramHandler.GET("", h.ParameterHandler.GetAllParameters)
+			paramHandler.PUT("", middleware.ValidateRequest(&models.Parameter{}), h.ParameterHandler.UpdateParameters)
 		}
 	}
 

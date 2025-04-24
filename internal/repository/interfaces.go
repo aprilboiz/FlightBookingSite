@@ -31,6 +31,11 @@ type TicketClassRepository interface {
 	GetByNames(names []string) (map[string]*models.TicketClass, error)
 }
 
+type ParameterRepository interface {
+	GetAllParams() (*models.Parameter, error)
+	UpdateParams(params *models.Parameter) (*models.Parameter, error)
+}
+
 type FlightCodeGenerator interface {
 	Generate() (string, error)
 }

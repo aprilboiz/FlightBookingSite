@@ -5,6 +5,7 @@ import (
 )
 
 type FlightHandler interface {
+	GetAllFlightsInList(c *gin.Context)
 	GetAllFlights(c *gin.Context)
 	GetFlightByCode(c *gin.Context)
 	CreateFlight(c *gin.Context)
@@ -20,4 +21,9 @@ type PlaneHandler interface {
 type AirportHandler interface {
 	GetAllAirports(c *gin.Context)
 	GetAirportByCode(c *gin.Context)
+}
+
+type ParameterHandler interface {
+	GetAllParameters(c *gin.Context)
+	UpdateParameters(c *gin.Context)
 }

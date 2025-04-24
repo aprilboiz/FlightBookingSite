@@ -85,13 +85,14 @@ type Ticket struct {
 }
 
 type Parameter struct {
-	gorm.Model
-	NumberOfAirports            int `gorm:"not null"`
-	MinFlightDuration           int `gorm:"not null"`
-	MaxIntermediateStops        int `gorm:"not null"`
-	MinIntermediateStopDuration int `gorm:"not null"`
-	MaxIntermediateStopDuration int `gorm:"not null"`
-	MaxTicketClasses            int `gorm:"not null"`
-	LatestTicketPurchaseTime    int `gorm:"not null"`
-	TicketCancellationTime      int `gorm:"not null"`
+	gorm.Model                  `json:"-"`
+	NumberOfAirports            int    `gorm:"not null" json:"number_of_airports"`
+	MinFlightDuration           int    `gorm:"not null" json:"min_flight_duration"`
+	MaxIntermediateStops        int    `gorm:"not null" json:"max_intermediate_stops"`
+	MinIntermediateStopDuration int    `gorm:"not null" json:"min_intermediate_stop_duration"`
+	MaxIntermediateStopDuration int    `gorm:"not null" json:"max_intermediate_stop_duration"`
+	MaxTicketClasses            int    `gorm:"not null" json:"max_ticket_classes"`
+	LatestTicketPurchaseTime    int    `gorm:"not null" json:"latest_ticket_purchase_time"`
+	TicketCancellationTime      int    `gorm:"not null" json:"ticket_cancellation_time"`
+	lock                        string `gorm:"type:char(1);unique;not null;default:'X';check:lock='X'"`
 }
