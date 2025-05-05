@@ -13,8 +13,12 @@ type ticketHandler struct {
 }
 
 func (t ticketHandler) GetAllTickets(c *gin.Context) {
-	//TODO implement me
-	panic("implement me")
+	tickets, err := t.ticketService.GetAllTickets()
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+	c.JSON(http.StatusOK, tickets)
 }
 
 func (t ticketHandler) GetTicketByID(c *gin.Context) {

@@ -17,8 +17,13 @@ type planeRepository struct {
 }
 
 func (p planeRepository) GetSeatByNumberAndPlaneCode(seatNumber, planeCode string) (*models.Seat, error) {
+	plane, err := p.GetByCode(planeCode)
+	if err != nil {
+		return nil, err
+	}
+
 	var seat models.Seat
-	result := p.db.Where("seat_number = ? AND plane_code = ?", seatNumber, planeCode).
+	result := p.db.Where("seat_number = ? AND plane_id = ?", seatNumber, plane.ID).
 		Preload("TicketClass").
 		First(&seat)
 	if result.Error != nil {

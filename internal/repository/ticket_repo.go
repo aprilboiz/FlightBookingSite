@@ -13,8 +13,15 @@ type ticketRepository struct {
 }
 
 func (t ticketRepository) GetAll() ([]*models.Ticket, error) {
-	//TODO implement me
-	panic("implement me")
+	var tickets []*models.Ticket
+	result := t.db.
+		Preload("Flight").
+		Preload("Seat").
+		Find(&tickets)
+	if result.Error != nil {
+		return nil, exceptions.Internal("failed to get all tickets", result.Error)
+	}
+	return tickets, nil
 }
 
 func (t ticketRepository) GetByID(id uint) (*models.Ticket, error) {

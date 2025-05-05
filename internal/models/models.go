@@ -71,9 +71,9 @@ type IntermediateStop struct {
 }
 
 type Ticket struct {
-	gorm.Model
-	FlightID     uint    `gorm:"not null"`
-	SeatID       uint    `gorm:"not null"`
+	ID           uint    `gorm:"primaryKey"`
+	FlightID     uint    `gorm:"primaryKey"`
+	SeatID       uint    `gorm:"primaryKey"`
 	Price        float64 `gorm:"not null"`
 	FullName     string  `gorm:"not null"`
 	IDCard       string  `gorm:"not null"`

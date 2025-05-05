@@ -13,8 +13,8 @@ type ticketService struct {
 }
 
 func (t ticketService) GetAllTickets() ([]*dto.TicketResponse, error) {
-	var tickets []*dto.TicketResponse
 	allTickets, err := t.ticketRepo.GetAll()
+	tickets := make([]*dto.TicketResponse, 0)
 	if err != nil {
 		return nil, err
 	}
