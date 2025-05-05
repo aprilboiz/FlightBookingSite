@@ -56,6 +56,7 @@ type Flight struct {
 	ArrivalAirport    Airport `gorm:"foreignKey:ArrivalAirportID;references:ID"`
 	Plane             Plane   `gorm:"foreignKey:PlaneID;references:ID"`
 	IntermediateStops []IntermediateStop
+	Tickets           []Ticket
 }
 
 type IntermediateStop struct {

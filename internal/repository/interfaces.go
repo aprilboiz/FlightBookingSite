@@ -6,7 +6,7 @@ import (
 
 type FlightRepository interface {
 	GetAll() ([]*models.Flight, error)
-	GetByID(id int) (*models.Flight, error)
+	GetByID(id uint) (*models.Flight, error)
 	GetByCode(code string) (*models.Flight, error)
 	Create(flight *models.Flight) (*models.Flight, error)
 	Update(flight *models.Flight) (*models.Flight, error)
@@ -24,6 +24,7 @@ type PlaneRepository interface {
 	GetAll() ([]*models.Plane, error)
 	GetByID(id uint) (*models.Plane, error)
 	GetByCode(code string) (*models.Plane, error)
+	GetSeatByNumberAndPlaneCode(seatNumber, planeCode string) (*models.Seat, error)
 }
 
 type TicketClassRepository interface {
@@ -38,4 +39,11 @@ type ParameterRepository interface {
 
 type FlightCodeGenerator interface {
 	Generate() (string, error)
+}
+
+type TicketRepository interface {
+	GetAll() ([]*models.Ticket, error)
+	GetByID(id uint) (*models.Ticket, error)
+	Create(ticket *models.Ticket) (*models.Ticket, error)
+	UpdateTicketStatus(ticketId uint, newStatus string) (*models.Ticket, error)
 }

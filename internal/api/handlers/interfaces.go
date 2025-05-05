@@ -27,3 +27,11 @@ type ParameterHandler interface {
 	GetAllParameters(c *gin.Context)
 	UpdateParameters(c *gin.Context)
 }
+
+type TicketHandler interface {
+	GetAllTickets(c *gin.Context)
+	GetTicketByID(c *gin.Context)
+	CreateTicket(c *gin.Context)
+	UpdateTicketStatus(c *gin.Context)
+	DeleteTicket(c *gin.Context)
+}

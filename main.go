@@ -53,24 +53,28 @@ func main() {
 	flightRepo := repository.NewFlightRepository(db)
 	airportRepo := repository.NewAirportRepository(db)
 	planeRepo := repository.NewPlaneRepository(db)
+	ticketRepo := repository.NewTicketRepository(db)
 
 	// Services
 	paramService := service.NewParamService(paramRepo)
 	flightService := service.NewFlightService(flightRepo, airportRepo, planeRepo, paramRepo)
 	airportService := service.NewAirportService(airportRepo)
 	planeService := service.NewPlaneService(planeRepo)
+	ticketService := service.NewTicketService(ticketRepo, flightRepo, planeRepo)
 
 	// Handlers
 	paramHandler := handlers.NewParameterHandler(paramService)
 	flightHandler := handlers.NewFlightHandler(flightService)
 	airportHandler := handlers.NewAirportHandler(airportService)
 	planeHandler := handlers.NewPlaneHandler(planeService)
+	ticketHandler := handlers.NewTicketHandler(ticketService)
 
 	h := api.Handlers{
 		ParameterHandler: paramHandler,
 		AirportHandler:   airportHandler,
 		PlaneHandler:     planeHandler,
 		FlightHandler:    flightHandler,
+		TicketHandler:    ticketHandler,
 		Logger:           log,
 	}
 

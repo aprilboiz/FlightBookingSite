@@ -30,7 +30,7 @@ func (f flightRepository) GetAll() ([]*models.Flight, error) {
 	return flights, nil
 }
 
-func (f flightRepository) GetByID(id int) (*models.Flight, error) {
+func (f flightRepository) GetByID(id uint) (*models.Flight, error) {
 	var flight models.Flight
 	result := f.db.
 		Preload("DepartureAirport").
@@ -41,7 +41,7 @@ func (f flightRepository) GetByID(id int) (*models.Flight, error) {
 		First(&flight)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-			return nil, exceptions.NotFound("flight", strconv.Itoa(id))
+			return nil, exceptions.NotFound("flight", strconv.Itoa(int(id)))
 		}
 		return nil, exceptions.Internal("failed to get flight by id", result.Error)
 	}
@@ -91,4 +91,18 @@ func (f flightRepository) CreateIntermediateStops(stops []*models.IntermediateSt
 		return nil, exceptions.Internal("failed to create intermediate stops", result.Error)
 	}
 	return stops, nil
+}
+
+func (f flightRepository) GetAvailableSeats(flightCode string) ([]*models.Seat, error) {
+	var seats []*models.Seat
+	result := f.db.
+		Preload("TicketClass").
+		Preload("Tickets").
+		Joins("JOIN flights ON flights.plane_id = seats.plane_id").
+		Where("flights.flight_code = ?", flightCode).
+		Find(&seats)
+	if result.Error != nil {
+		return nil, exceptions.Internal("failed to get available seats", result.Error)
+	}
+	return seats, nil
 }

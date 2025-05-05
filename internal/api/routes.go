@@ -19,6 +19,7 @@ type Handlers struct {
 	AirportHandler   handlers.AirportHandler
 	PlaneHandler     handlers.PlaneHandler
 	FlightHandler    handlers.FlightHandler
+	TicketHandler    handlers.TicketHandler
 	Logger           *zap.Logger
 }
 
@@ -67,6 +68,15 @@ func SetupRoutes(router *gin.Engine, h Handlers) {
 		{
 			paramHandler.GET("", h.ParameterHandler.GetAllParameters)
 			paramHandler.PUT("", middleware.ValidateRequest(&models.Parameter{}), h.ParameterHandler.UpdateParameters)
+		}
+
+		ticketRoutes := v1.Group("/tickets")
+		{
+			ticketRoutes.GET("", h.TicketHandler.GetAllTickets)
+			ticketRoutes.GET("/:id", h.TicketHandler.GetTicketByID)
+			ticketRoutes.POST("", middleware.ValidateRequest(&dto.TicketRequest{}), h.TicketHandler.CreateTicket)
+			ticketRoutes.PUT("/:id", middleware.ValidateRequest(&dto.TicketRequest{}), h.TicketHandler.UpdateTicketStatus)
+			ticketRoutes.DELETE("/:id", h.TicketHandler.DeleteTicket)
 		}
 	}
 

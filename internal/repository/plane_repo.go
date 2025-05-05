@@ -16,6 +16,20 @@ type planeRepository struct {
 	db *gorm.DB
 }
 
+func (p planeRepository) GetSeatByNumberAndPlaneCode(seatNumber, planeCode string) (*models.Seat, error) {
+	var seat models.Seat
+	result := p.db.Where("seat_number = ? AND plane_code = ?", seatNumber, planeCode).
+		Preload("TicketClass").
+		First(&seat)
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return nil, exceptions.NotFound("seat", seatNumber)
+		}
+		return nil, exceptions.Internal("failed to get seat by number and plane code", result.Error)
+	}
+	return &seat, nil
+}
+
 func (p planeRepository) GetAll() ([]*models.Plane, error) {
 	planes := make([]*models.Plane, 0)
 

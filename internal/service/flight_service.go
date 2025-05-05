@@ -93,7 +93,7 @@ func (f flightService) GetAllFlights() ([]*dto.FlightResponse, error) {
 }
 
 func (f flightService) GetFlightByID(flightID int) (*dto.FlightResponse, error) {
-	flight, err := f.flightRepo.GetByID(flightID)
+	flight, err := f.flightRepo.GetByID(uint(flightID))
 	if err != nil {
 		var appErr *exceptions.AppError
 		if errors.As(err, &appErr) {

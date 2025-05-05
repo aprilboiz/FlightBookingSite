@@ -33,3 +33,10 @@ type ParameterService interface {
 type FlightCodeGenerator interface {
 	Generate() (string, error)
 }
+
+type TicketService interface {
+	GetAllTickets() ([]*dto.TicketResponse, error)
+	GetTicketByID(id uint) (*dto.TicketResponse, error)
+	Create(ticket *dto.TicketRequest) (*dto.TicketResponse, error)
+	UpdateTicketStatus(ticketId uint, newStatus string) (*dto.TicketResponse, error)
+}
