@@ -1,8 +1,24 @@
 package models
 
 import (
-	"gorm.io/gorm"
 	"time"
+
+	"gorm.io/gorm"
+)
+
+// Ticket status constants
+const (
+	TicketStatusActive    = "ACTIVE"    // Ticket is active and can be used
+	TicketStatusCancelled = "CANCELLED" // Ticket has been cancelled
+	TicketStatusUsed      = "USED"      // Ticket has been used for the flight
+	TicketStatusExpired   = "EXPIRED"   // Ticket has expired (for place orders)
+	TicketStatusRefunded  = "REFUNDED"  // Ticket has been refunded
+)
+
+// Booking type constants
+const (
+	BookingTypeTicket     = "TICKET"      // Regular confirmed ticket
+	BookingTypePlaceOrder = "PLACE_ORDER" // Temporary place order
 )
 
 type Plane struct {
@@ -79,7 +95,8 @@ type Ticket struct {
 	IDCard       string  `gorm:"not null"`
 	PhoneNumber  string  `gorm:"not null"`
 	Email        string  `gorm:"not null"`
-	FlightStatus string  `gorm:"not null"`
+	TicketStatus string  `gorm:"not null;default:'ACTIVE'"` // Status of the ticket
+	BookingType  string  `gorm:"not null;default:'TICKET'"` // Type of booking
 
 	Flight Flight `gorm:"foreignKey:FlightID;references:ID"`
 	Seat   Seat   `gorm:"foreignKey:SeatID;references:ID"`
