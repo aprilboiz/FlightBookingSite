@@ -1,8 +1,9 @@
 package main
 
 import (
-	"github.com/aprilboiz/flight-management/pkg/config"
 	"time"
+
+	"github.com/aprilboiz/flight-management/pkg/config"
 
 	"github.com/aprilboiz/flight-management/internal/api"
 	"github.com/aprilboiz/flight-management/internal/api/handlers"
@@ -16,21 +17,21 @@ import (
 	"go.uber.org/zap"
 )
 
-// @title Flight Management API
-// @version 1.0
-// @description API for flight management system
-// @termsOfService http://swagger.io/terms/
+//	@title			Flight Management API
+//	@version		1.0
+//	@description	API for flight management system
+//	@termsOfService	http://swagger.io/terms/
 
-// @contact.name API Support
-// @contact.url http://www.ruaairline.com/support
-// @contact.email support@ruaairline.com
+//	@contact.name	API Support
+//	@contact.url	http://www.ruaairline.com/support
+//	@contact.email	support@ruaairline.com
 
-// @license.name Apache 2.0
-// @license.url http://www.apache.org/licenses/LICENSE-2.0.html
+//	@license.name	Apache 2.0
+//	@license.url	http://www.apache.org/licenses/LICENSE-2.0.html
 
-// @host localhost:8080
-// @BasePath /api
-// @schemes http https
+//	@host		localhost:8080
+//	@BasePath	/api
+//	@schemes	http https
 
 func main() {
 	// Initialize logger
@@ -57,10 +58,10 @@ func main() {
 
 	// Services
 	paramService := service.NewParamService(paramRepo)
-	flightService := service.NewFlightService(flightRepo, airportRepo, planeRepo, paramRepo)
+	flightService := service.NewFlightService(flightRepo, airportRepo, planeRepo, paramRepo, ticketRepo)
 	airportService := service.NewAirportService(airportRepo)
 	planeService := service.NewPlaneService(planeRepo)
-	ticketService := service.NewTicketService(ticketRepo, flightRepo, planeRepo)
+	ticketService := service.NewTicketService(ticketRepo, flightRepo, planeRepo, paramRepo)
 
 	// Handlers
 	paramHandler := handlers.NewParameterHandler(paramService)
