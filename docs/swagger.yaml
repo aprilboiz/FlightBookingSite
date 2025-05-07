@@ -11,6 +11,13 @@ definitions:
       country_name:
         type: string
     type: object
+  dto.BookingTypesResponse:
+    properties:
+      types:
+        items:
+          type: string
+        type: array
+    type: object
   dto.ErrorResponse:
     properties:
       details: {}
@@ -20,6 +27,43 @@ definitions:
         type: integer
       type:
         type: string
+    type: object
+  dto.FlightListResponse:
+    properties:
+      arrival_airport:
+        type: string
+      arrival_city:
+        type: string
+      arrival_country:
+        type: string
+      base_price:
+        type: number
+      booked_seats:
+        type: integer
+      departure_airport:
+        type: string
+      departure_city:
+        type: string
+      departure_country:
+        type: string
+      departure_date_time:
+        type: string
+      duration:
+        type: integer
+      empty_seats:
+        type: integer
+      flight_code:
+        type: string
+      has_stops:
+        type: boolean
+      plane_code:
+        type: string
+      plane_name:
+        type: string
+      stop_count:
+        type: integer
+      total_seats:
+        type: integer
     type: object
   dto.FlightRequest:
     properties:
@@ -46,11 +90,15 @@ definitions:
         type: string
       base_price:
         type: number
+      booked_seats:
+        type: integer
       departure_airport:
         type: string
       departure_date:
         type: string
       duration:
+        type: integer
+      empty_seats:
         type: integer
       flight_code:
         type: string
@@ -60,6 +108,8 @@ definitions:
         type: array
       plane_code:
         type: string
+      total_seats:
+        type: integer
     type: object
   dto.IntermediateStopDTO:
     properties:
@@ -78,6 +128,86 @@ definitions:
         type: string
       plane_name:
         type: string
+    type: object
+  dto.TicketRequest:
+    properties:
+      booking_type:
+        enum:
+        - TICKET
+        - PLACE_ORDER
+        type: string
+      email:
+        type: string
+      flight_code:
+        type: string
+      full_name:
+        type: string
+      id_card:
+        type: string
+      phone_number:
+        type: string
+      seat_number:
+        type: string
+    required:
+    - booking_type
+    - email
+    - flight_code
+    - full_name
+    - id_card
+    - phone_number
+    - seat_number
+    type: object
+  dto.TicketResponse:
+    properties:
+      booking_type:
+        type: string
+      email:
+        type: string
+      flight_code:
+        type: string
+      full_name:
+        type: string
+      id:
+        type: integer
+      id_card:
+        type: string
+      phone_number:
+        type: string
+      price:
+        type: number
+      seat_number:
+        type: string
+      ticket_status:
+        type: string
+    type: object
+  dto.TicketStatusUpdateRequest:
+    properties:
+      status:
+        enum:
+        - ACTIVE
+        - CANCELLED
+        - EXPIRED
+        type: string
+    required:
+    - status
+    type: object
+  dto.TicketStatusesResponse:
+    properties:
+      statuses:
+        items:
+          type: string
+        type: array
+    type: object
+  exceptions.AppError:
+    properties:
+      code:
+        type: string
+      details: {}
+      err: {}
+      message:
+        type: string
+      statusCode:
+        type: integer
     type: object
   models.Parameter:
     properties:
@@ -305,7 +435,28 @@ paths:
       summary: Update a flight
       tags:
       - flights
-  /api/parameters:
+  /api/flights/list:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a list of all flights with simplified information
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/dto.FlightListResponse'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Get all flights in list format
+      tags:
+      - flights
+  /api/params:
     get:
       consumes:
       - application/json
@@ -333,7 +484,7 @@ paths:
       parameters:
       - description: Parameter information
         in: body
-        name: flight
+        name: param
         required: true
         schema:
           $ref: '#/definitions/models.Parameter'
@@ -403,6 +554,180 @@ paths:
       summary: Get plane by code
       tags:
       - planes
+  /tickets:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a list of all tickets in the system
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/dto.TicketResponse'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/exceptions.AppError'
+      summary: Get all tickets
+      tags:
+      - tickets
+    post:
+      consumes:
+      - application/json
+      description: Create a new ticket with the provided information
+      parameters:
+      - description: Ticket information
+        in: body
+        name: ticket
+        required: true
+        schema:
+          $ref: '#/definitions/dto.TicketRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dto.TicketResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/exceptions.AppError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/exceptions.AppError'
+      summary: Create a new ticket
+      tags:
+      - tickets
+  /tickets/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a specific ticket by its ID
+      parameters:
+      - description: Ticket ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/exceptions.AppError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/exceptions.AppError'
+      summary: Delete a ticket
+      tags:
+      - tickets
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a specific ticket by its ID
+      parameters:
+      - description: Ticket ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.TicketResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/exceptions.AppError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/exceptions.AppError'
+      summary: Get ticket by ID
+      tags:
+      - tickets
+  /tickets/{id}/status:
+    put:
+      consumes:
+      - application/json
+      description: Update the status of a specific ticket
+      parameters:
+      - description: Ticket ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: New ticket status
+        in: body
+        name: status
+        required: true
+        schema:
+          $ref: '#/definitions/dto.TicketStatusUpdateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.TicketResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/exceptions.AppError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/exceptions.AppError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/exceptions.AppError'
+      summary: Update ticket status
+      tags:
+      - tickets
+  /tickets/booking-types:
+    get:
+      consumes:
+      - application/json
+      description: Get a list of all possible booking types
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.BookingTypesResponse'
+      summary: Get all available booking types
+      tags:
+      - tickets
+  /tickets/statuses:
+    get:
+      consumes:
+      - application/json
+      description: Get a list of all possible ticket statuses
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.TicketStatusesResponse'
+      summary: Get all available ticket statuses
+      tags:
+      - tickets
 schemes:
 - http
 - https
