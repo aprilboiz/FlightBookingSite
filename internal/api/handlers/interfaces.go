@@ -34,4 +34,6 @@ type TicketHandler interface {
 	CreateTicket(c *gin.Context)
 	UpdateTicketStatus(c *gin.Context)
 	DeleteTicket(c *gin.Context)
+	GetTicketStatuses(c *gin.Context)
+	GetBookingTypes(c *gin.Context)
 }

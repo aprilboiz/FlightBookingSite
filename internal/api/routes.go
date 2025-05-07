@@ -1,6 +1,8 @@
 package api
 
 import (
+	"net/http"
+
 	docs "github.com/aprilboiz/flight-management/docs"
 	"github.com/aprilboiz/flight-management/internal/api/handlers"
 	"github.com/aprilboiz/flight-management/internal/dto"
@@ -11,7 +13,6 @@ import (
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 	"go.uber.org/zap"
-	"net/http"
 )
 
 type Handlers struct {
@@ -47,6 +48,7 @@ func SetupRoutes(router *gin.Engine, h Handlers) {
 		{
 			flightRoutes.POST("", middleware.ValidateRequest(&dto.FlightRequest{}), h.FlightHandler.CreateFlight)
 			flightRoutes.GET("", h.FlightHandler.GetAllFlights)
+			flightRoutes.GET("/list", h.FlightHandler.GetAllFlightsInList)
 			flightRoutes.GET("/:code", h.FlightHandler.GetFlightByCode)
 			flightRoutes.PUT("/:code", middleware.ValidateRequest(&dto.FlightRequest{}), h.FlightHandler.UpdateFlight)
 			flightRoutes.DELETE("/:code", h.FlightHandler.DeleteFlightByCode)
@@ -75,8 +77,10 @@ func SetupRoutes(router *gin.Engine, h Handlers) {
 			ticketRoutes.GET("", h.TicketHandler.GetAllTickets)
 			ticketRoutes.GET("/:id", h.TicketHandler.GetTicketByID)
 			ticketRoutes.POST("", middleware.ValidateRequest(&dto.TicketRequest{}), h.TicketHandler.CreateTicket)
-			ticketRoutes.PUT("/:id", middleware.ValidateRequest(&dto.TicketRequest{}), h.TicketHandler.UpdateTicketStatus)
+			ticketRoutes.PUT("/:id/status", middleware.ValidateRequest(&dto.TicketStatusUpdateRequest{}), h.TicketHandler.UpdateTicketStatus)
 			ticketRoutes.DELETE("/:id", h.TicketHandler.DeleteTicket)
+			ticketRoutes.GET("/statuses", h.TicketHandler.GetTicketStatuses)
+			ticketRoutes.GET("/booking-types", h.TicketHandler.GetBookingTypes)
 		}
 	}
 
