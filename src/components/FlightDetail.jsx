@@ -116,7 +116,7 @@ const FlightDetail = () => {
       {flight.intermediate_stop.length > 0 && (
         <>
           <h2 className='text-xl mt-10 font-light'>Thông tin chi tiết chuyến bay trung gian</h2>
-          {flight.intermediate_stops.map((item, index) => (
+          {flight.intermediate_stop.map((item, index) => (
             <div key={index} className='flex items-center justify-between w-full mt-10'>
               <div className='flex items-center justify-center gap-6'>
                 <RiPlaneLine className='text-3xl'/>

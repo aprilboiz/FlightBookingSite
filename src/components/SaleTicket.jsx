@@ -1,52 +1,88 @@
-import React from 'react'
-import {
-    Input,
-    Table,
-} from 'antd'
-import { data } from 'react-router-dom'
-import TicketBooking from './TicketBooking'
+import React, { useState, useEffect } from "react";
+import { Input, Table, notification } from "antd";
+import TicketBooking from "./TicketBooking";
+import { getFlights } from "../services/flightService.js";
 
-const { Search } = Input
+const { Search } = Input;
 
 const SaleTicket = () => {
+  const [flights, setFlights] = useState([]);
+  const [filteredFlights, setFilteredFlights] = useState([]);
+  const [selectedFlight, setSelectedFlight] = useState(null);
 
-  const columns = [
-    { title: 'Mã chuyến bay', dataIndex: 'code', key: 'code' },
-    { title: "Sân bay từ", dataIndex: "from", key: "from" },
-    { title: "Sân bay đến", dataIndex: "to", key: "to" },
-    { title: "Sân bay trung gian", dataIndex: "transit", key: "transit" },
-    { title: "Ngày - giờ khởi hành", dataIndex: "date", key: "date" },
-    { title: "Giá vé", dataIndex: "price", key: "price" },
-    { title: "Số lượng ghế", dataIndex: "quantity", key: "quantity" },
-  ]
+  useEffect(() => {
+    fetchFlights();
+  }, []);
 
-  const data = [
-    {  key: '1', code: 'RUA001', from: 'Hà Nội', to: 'TP.Hồ Chí Minh', transit: 'Đà Nẵng', date: '01/01/2022 08:00', price: '1.000.000', quantity: '100' },
-    {  key: '2', code: 'RUA002', from: 'TP.Hồ Chí Minh', to: 'Hà Nội', transit: 'Đà Nẵng', date: '01/01/2022 08:00', price: '1.000.000', quantity: '100' },
-    {  key: '3', code: 'RUA003', from: 'Hà Nội', to: 'Đà Nẵng', transit: '', date: '01/01/2022 08:00', price: '1.000.000', quantity: '100' },
-  ]
+  const fetchFlights = async () => {
+    try {
+      const data = await getFlights();
+      setFlights(data);
+      setFilteredFlights(data);
+    } catch (error) {
+      notification.error({
+        message: "Lỗi",
+        description: "Không thể tải danh sách chuyến bay",
+      });
+    }
+  };
+
+  const handleSearch = (value) => {
+    const result = flights.filter((flight) =>
+      flight.flight_code.toLowerCase().includes(value.toLowerCase())
+    );
+    setFilteredFlights(result);
+  };
+
+  const handleRowClick = (record) => {
+    setSelectedFlight(record);
+  };
 
   return (
-    <div className='flex justify-between items-start gap-5'>
-        <div className='w-3/4'>
-            <div><Search placeholder='Tìm kiếm mã chuyến bay' enterButton/></div>
-            <div>
-                <Table
-                    columns={columns}
-                    dataSource={data}
-                    pagination={false}
-                    bordered
-                    scroll={{y:300}}
-                    className="mt-5"
-                />
-            </div>
-        </div>
+    <div className="flex justify-between items-start gap-5">
+      <div className="w-3/4">
+        <Input
+          placeholder="Tìm kiếm mã chuyến bay"
+          allowClear
+          onChange={(e) => handleSearch(e.target.value)}
+        />
 
-        <div>
-            <TicketBooking />
-        </div>
+        <Table
+          dataSource={filteredFlights}
+          rowKey={(record) => record.flight_code}
+          pagination={false}
+          onRow={(record) => ({
+            onClick: () => handleRowClick(record),
+          })}
+          columns={[
+            {
+              title: "Mã chuyến bay",
+              dataIndex: "flight_code",
+              key: "flight_code",
+            },
+            {
+              title: "Điểm đi",
+              dataIndex: "departure_airport",
+              key: "departure_airport",
+            },
+            {
+              title: "Điểm đến",
+              dataIndex: "arrival_airport",
+              key: "arrival_airport",
+            },
+            {
+              title: "Thời gian",
+              dataIndex: "departure_date_time",
+              key: "departure_date_time",
+            },
+          ]}
+        />
+      </div>
+      <div>
+        <TicketBooking selectedFlight={selectedFlight} />
+      </div>
     </div>
-  )
-}
+  );
+};
 
-export default SaleTicket
+export default SaleTicket;
