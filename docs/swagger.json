@@ -495,6 +495,145 @@
                 }
             }
         },
+        "/api/reports/revenue": {
+            "get": {
+                "description": "Retrieve revenue statistics for flights in a specific month and year",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "reports"
+                ],
+                "summary": "Get revenue report",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Month (1-12) or leave it blank for current month",
+                        "name": "month",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Year (e.g., 2024) or leave it blank for current year",
+                        "name": "year",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.MonthlyRevenueReport"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/reports/revenue/monthly": {
+            "get": {
+                "description": "Retrieve revenue statistics for flights in a specific month",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "reports"
+                ],
+                "summary": "Get monthly revenue report",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Month (1-12) or leave it blank for current month",
+                        "name": "month",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.MonthlyRevenueReport"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/reports/revenue/yearly": {
+            "get": {
+                "description": "Retrieve revenue statistics for flights in a specific year",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "reports"
+                ],
+                "summary": "Get yearly revenue report",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Year (e.g., 2024) or leave it blank for current year",
+                        "name": "year",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.YearlyRevenueReport"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/tickets": {
             "get": {
                 "description": "Retrieve a list of all tickets in the system",
@@ -983,6 +1122,24 @@
                 }
             }
         },
+        "dto.FlightRevenueReport": {
+            "type": "object",
+            "properties": {
+                "flightCode": {
+                    "type": "string"
+                },
+                "ratio": {
+                    "description": "Ratio of actual revenue to potential revenue",
+                    "type": "number"
+                },
+                "revenue": {
+                    "type": "number"
+                },
+                "tickets": {
+                    "type": "integer"
+                }
+            }
+        },
         "dto.IntermediateStopDTO": {
             "type": "object",
             "properties": {
@@ -997,6 +1154,49 @@
                 },
                 "stop_order": {
                     "type": "integer"
+                }
+            }
+        },
+        "dto.MonthlyRevenueReport": {
+            "type": "object",
+            "properties": {
+                "averageRatio": {
+                    "type": "number"
+                },
+                "flights": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.FlightRevenueReport"
+                    }
+                },
+                "month": {
+                    "description": "Format: \"YYYY-MM\"",
+                    "type": "string"
+                },
+                "totalRevenue": {
+                    "type": "number"
+                },
+                "totalTickets": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.MonthlyRevenueSummary": {
+            "type": "object",
+            "properties": {
+                "flightCount": {
+                    "type": "integer"
+                },
+                "month": {
+                    "description": "Format: \"YYYY-MM\"",
+                    "type": "string"
+                },
+                "ratio": {
+                    "description": "Average ratio across all flights",
+                    "type": "number"
+                },
+                "revenue": {
+                    "type": "number"
                 }
             }
         },
@@ -1146,6 +1346,30 @@
                     "items": {
                         "type": "string"
                     }
+                }
+            }
+        },
+        "dto.YearlyRevenueReport": {
+            "type": "object",
+            "properties": {
+                "averageRatio": {
+                    "type": "number"
+                },
+                "months": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.MonthlyRevenueSummary"
+                    }
+                },
+                "totalFlights": {
+                    "type": "integer"
+                },
+                "totalRevenue": {
+                    "type": "number"
+                },
+                "year": {
+                    "description": "Format: \"YYYY\"",
+                    "type": "string"
                 }
             }
         },

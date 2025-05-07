@@ -146,6 +146,18 @@ definitions:
       total_seats:
         type: integer
     type: object
+  dto.FlightRevenueReport:
+    properties:
+      flightCode:
+        type: string
+      ratio:
+        description: Ratio of actual revenue to potential revenue
+        type: number
+      revenue:
+        type: number
+      tickets:
+        type: integer
+    type: object
   dto.IntermediateStopDTO:
     properties:
       note:
@@ -156,6 +168,35 @@ definitions:
         type: integer
       stop_order:
         type: integer
+    type: object
+  dto.MonthlyRevenueReport:
+    properties:
+      averageRatio:
+        type: number
+      flights:
+        items:
+          $ref: '#/definitions/dto.FlightRevenueReport'
+        type: array
+      month:
+        description: 'Format: "YYYY-MM"'
+        type: string
+      totalRevenue:
+        type: number
+      totalTickets:
+        type: integer
+    type: object
+  dto.MonthlyRevenueSummary:
+    properties:
+      flightCount:
+        type: integer
+      month:
+        description: 'Format: "YYYY-MM"'
+        type: string
+      ratio:
+        description: Average ratio across all flights
+        type: number
+      revenue:
+        type: number
     type: object
   dto.PlaneResponse:
     properties:
@@ -256,6 +297,22 @@ definitions:
         items:
           type: string
         type: array
+    type: object
+  dto.YearlyRevenueReport:
+    properties:
+      averageRatio:
+        type: number
+      months:
+        items:
+          $ref: '#/definitions/dto.MonthlyRevenueSummary'
+        type: array
+      totalFlights:
+        type: integer
+      totalRevenue:
+        type: number
+      year:
+        description: 'Format: "YYYY"'
+        type: string
     type: object
   exceptions.AppError:
     properties:
@@ -613,6 +670,99 @@ paths:
       summary: Get plane by code
       tags:
       - planes
+  /api/reports/revenue:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve revenue statistics for flights in a specific month and
+        year
+      parameters:
+      - description: Month (1-12) or leave it blank for current month
+        in: query
+        name: month
+        required: true
+        type: integer
+      - description: Year (e.g., 2024) or leave it blank for current year
+        in: query
+        name: year
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.MonthlyRevenueReport'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Get revenue report
+      tags:
+      - reports
+  /api/reports/revenue/monthly:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve revenue statistics for flights in a specific month
+      parameters:
+      - description: Month (1-12) or leave it blank for current month
+        in: query
+        name: month
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.MonthlyRevenueReport'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Get monthly revenue report
+      tags:
+      - reports
+  /api/reports/revenue/yearly:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve revenue statistics for flights in a specific year
+      parameters:
+      - description: Year (e.g., 2024) or leave it blank for current year
+        in: query
+        name: year
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.YearlyRevenueReport'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Get yearly revenue report
+      tags:
+      - reports
   /tickets:
     get:
       consumes:
