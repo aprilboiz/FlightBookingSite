@@ -883,3 +883,171 @@ func (f flightService) GetAllFlightsInList() ([]*dto.FlightListResponse, error) 
 
 	return flightResponses, nil
 }
+
+func (f flightService) GetMonthlyRevenueReport(year int, month int) (*dto.MonthlyRevenueReport, error) {
+	// Validate month
+	if month < 1 || month > 12 {
+		return nil, exceptions.BadRequest("invalid month", nil)
+	}
+
+	// Get start and end dates for the month
+	startDate := time.Date(year, time.Month(month), 1, 0, 0, 0, 0, time.UTC)
+	endDate := startDate.AddDate(0, 1, 0).Add(-time.Second)
+
+	// Get all flights in the month
+	flights, err := f.flightRepo.GetFlightsByDateRange(startDate, endDate)
+	if err != nil {
+		return nil, exceptions.Internal("failed to get flights", err)
+	}
+
+	// Initialize report
+	report := &dto.MonthlyRevenueReport{
+		Month:   fmt.Sprintf("%04d-%02d", year, month),
+		Flights: make([]dto.FlightRevenueReport, 0),
+	}
+
+	// Calculate revenue for each flight
+	for _, flight := range flights {
+		// Get all tickets for this flight
+		tickets, err := f.ticketRepo.GetTicketsByFlightID(flight.ID)
+		if err != nil {
+			return nil, exceptions.Internal("failed to get tickets", err)
+		}
+
+		// Calculate actual revenue and number of active tickets
+		var actualRevenue float64
+		var activeSeats int64
+		for _, ticket := range tickets {
+			if ticket.TicketStatus == models.TicketStatusActive {
+				actualRevenue += ticket.Price
+				activeSeats++
+			}
+		}
+
+		// Get total seats and fill rate
+		totalSeats, err := f.getTotalSeatsForPlane(flight.PlaneID)
+		if err != nil {
+			return nil, err
+		}
+
+		// Calculate ratio
+		var ratio float64
+		if activeSeats > 0 {
+			ratio = float64(activeSeats) / float64(totalSeats)
+		}
+		// Add flight report
+		flightReport := dto.FlightRevenueReport{
+			FlightCode: flight.FlightCode,
+			Tickets:    len(tickets),
+			Revenue:    actualRevenue,
+			Ratio:      ratio * 100,
+		}
+		report.Flights = append(report.Flights, flightReport)
+
+		// Update totals
+		report.TotalRevenue += actualRevenue
+		report.TotalTickets += len(tickets)
+	}
+
+	// Calculate average ratio
+	if len(report.Flights) > 0 {
+		var totalRatio float64
+		for _, flight := range report.Flights {
+			totalRatio += flight.Ratio
+		}
+		report.AverageRatio = totalRatio / float64(len(report.Flights))
+	}
+
+	return report, nil
+}
+
+func (f flightService) GetYearlyRevenueReport(year int) (*dto.YearlyRevenueReport, error) {
+	// Initialize report
+	report := &dto.YearlyRevenueReport{
+		Year:   fmt.Sprintf("%04d", year),
+		Months: make([]dto.MonthlyRevenueSummary, 0, 12),
+	}
+
+	// Process each month
+	for month := 1; month <= 12; month++ {
+		// Get start and end dates for the month
+		startDate := time.Date(year, time.Month(month), 1, 0, 0, 0, 0, time.UTC)
+		endDate := startDate.AddDate(0, 1, 0).Add(-time.Second)
+
+		// Get all flights in the month
+		flights, err := f.flightRepo.GetFlightsByDateRange(startDate, endDate)
+		if err != nil {
+			return nil, exceptions.Internal("failed to get flights", err)
+		}
+
+		// Skip if no flights in this month
+		if len(flights) == 0 {
+			continue
+		}
+
+		// Initialize month summary
+		monthSummary := dto.MonthlyRevenueSummary{
+			Month:       fmt.Sprintf("%04d-%02d", year, month),
+			FlightCount: len(flights),
+		}
+
+		// Calculate revenue and ratio for each flight
+		var totalRatio float64
+		for _, flight := range flights {
+			// Get all tickets for this flight
+			tickets, err := f.ticketRepo.GetTicketsByFlightID(flight.ID)
+			if err != nil {
+				return nil, exceptions.Internal("failed to get tickets", err)
+			}
+
+			// Calculate actual revenue and active seats
+			var actualRevenue float64
+			var activeSeats int64
+			for _, ticket := range tickets {
+				if ticket.TicketStatus == models.TicketStatusActive {
+					actualRevenue += ticket.Price
+					activeSeats++
+				}
+			}
+
+			// Get total seats
+			totalSeats, err := f.getTotalSeatsForPlane(flight.PlaneID)
+			if err != nil {
+				return nil, err
+			}
+
+			// Calculate ratio
+			var ratio float64
+			if totalSeats > 0 {
+				ratio = float64(activeSeats) / float64(totalSeats)
+			}
+
+			// Update month summary
+			monthSummary.Revenue += actualRevenue
+			totalRatio += ratio
+		}
+
+		// Calculate average ratio for the month
+		if len(flights) > 0 {
+			monthSummary.Ratio = (totalRatio / float64(len(flights))) * 100
+		}
+
+		// Add month summary to report
+		report.Months = append(report.Months, monthSummary)
+
+		// Update yearly totals
+		report.TotalRevenue += monthSummary.Revenue
+		report.TotalFlights += monthSummary.FlightCount
+	}
+
+	// Calculate yearly average ratio
+	if len(report.Months) > 0 {
+		var totalRatio float64
+		for _, month := range report.Months {
+			totalRatio += month.Ratio
+		}
+		report.AverageRatio = totalRatio / float64(len(report.Months))
+	}
+
+	return report, nil
+}

@@ -103,6 +103,17 @@ func (t ticketRepository) Delete(id uint) error {
 	return nil
 }
 
+func (r *ticketRepository) GetTicketsByFlightID(flightID uint) ([]*models.Ticket, error) {
+	var tickets []*models.Ticket
+	result := r.db.
+		Where("flight_id = ?", flightID).
+		Find(&tickets)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return tickets, nil
+}
+
 func NewTicketRepository(db *gorm.DB) TicketRepository {
 	return &ticketRepository{db: db}
 }

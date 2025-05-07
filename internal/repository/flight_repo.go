@@ -3,6 +3,7 @@ package repository
 import (
 	"errors"
 	"strconv"
+	"time"
 
 	"github.com/aprilboiz/flight-management/internal/exceptions"
 	"github.com/aprilboiz/flight-management/internal/models"
@@ -124,4 +125,20 @@ func (f flightRepository) DeleteIntermediateStops(flightID uint) error {
 
 func (f flightRepository) GetDB() *gorm.DB {
 	return f.db
+}
+
+func (r *flightRepository) GetFlightsByDateRange(startDate, endDate time.Time) ([]*models.Flight, error) {
+	var flights []*models.Flight
+	result := r.db.
+		Preload("Plane").
+		Preload("DepartureAirport").
+		Preload("ArrivalAirport").
+		Preload("IntermediateStops").
+		Preload("IntermediateStops.Airport").
+		Where("departure_date_time BETWEEN ? AND ?", startDate, endDate).
+		Find(&flights)
+	if result.Error != nil {
+		return nil, exceptions.Internal("failed to get flights by date range", result.Error)
+	}
+	return flights, nil
 }

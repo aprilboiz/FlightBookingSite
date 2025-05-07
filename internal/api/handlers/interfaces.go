@@ -11,6 +11,9 @@ type FlightHandler interface {
 	CreateFlight(c *gin.Context)
 	UpdateFlight(c *gin.Context)
 	DeleteFlightByCode(c *gin.Context)
+	GetMonthlyRevenueReport(c *gin.Context)
+	GetYearlyRevenueReport(c *gin.Context)
+	GetRevenueReport(c *gin.Context)
 }
 
 type PlaneHandler interface {

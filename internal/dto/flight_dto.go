@@ -82,3 +82,33 @@ type FlightListResponse struct {
 	HasStops          bool    `json:"has_stops"`
 	StopCount         int     `json:"stop_count"`
 }
+
+type FlightRevenueReport struct {
+	FlightCode string  `json:"flightCode"`
+	Tickets    int     `json:"tickets"`
+	Revenue    float64 `json:"revenue"`
+	Ratio      float64 `json:"ratio"` // Ratio of actual revenue to potential revenue
+}
+
+type MonthlyRevenueReport struct {
+	Month        string                `json:"month"` // Format: "YYYY-MM"
+	Flights      []FlightRevenueReport `json:"flights"`
+	TotalRevenue float64               `json:"totalRevenue"`
+	TotalTickets int                   `json:"totalTickets"`
+	AverageRatio float64               `json:"averageRatio"`
+}
+
+type MonthlyRevenueSummary struct {
+	Month       string  `json:"month"` // Format: "YYYY-MM"
+	FlightCount int     `json:"flightCount"`
+	Revenue     float64 `json:"revenue"`
+	Ratio       float64 `json:"ratio"` // Average ratio across all flights
+}
+
+type YearlyRevenueReport struct {
+	Year         string                  `json:"year"` // Format: "YYYY"
+	Months       []MonthlyRevenueSummary `json:"months"`
+	TotalRevenue float64                 `json:"totalRevenue"`
+	TotalFlights int                     `json:"totalFlights"`
+	AverageRatio float64                 `json:"averageRatio"`
+}

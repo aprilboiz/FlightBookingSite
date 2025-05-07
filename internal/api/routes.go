@@ -54,6 +54,14 @@ func SetupRoutes(router *gin.Engine, h Handlers) {
 			flightRoutes.DELETE("/:code", h.FlightHandler.DeleteFlightByCode)
 		}
 
+		reportRoutes := v1.Group("/reports")
+		{
+
+			reportRoutes.GET("/revenue/monthly", h.FlightHandler.GetMonthlyRevenueReport)
+			reportRoutes.GET("/revenue/yearly", h.FlightHandler.GetYearlyRevenueReport)
+			reportRoutes.GET("/revenue", h.FlightHandler.GetRevenueReport)
+		}
+
 		planeRoutes := v1.Group("/planes")
 		{
 			planeRoutes.GET("", h.PlaneHandler.GetAllPlanes)

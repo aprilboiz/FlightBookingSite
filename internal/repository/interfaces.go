@@ -1,6 +1,8 @@
 package repository
 
 import (
+	"time"
+
 	"github.com/aprilboiz/flight-management/internal/models"
 	"gorm.io/gorm"
 )
@@ -15,6 +17,7 @@ type FlightRepository interface {
 	CreateIntermediateStops(stops []*models.IntermediateStop) ([]*models.IntermediateStop, error)
 	DeleteIntermediateStops(flightID uint) error
 	GetDB() *gorm.DB
+	GetFlightsByDateRange(startDate, endDate time.Time) ([]*models.Flight, error)
 }
 
 type AirportRepository interface {
@@ -58,4 +61,5 @@ type TicketRepository interface {
 	UpdateTicketStatus(ticketID uint, status string) error
 	Delete(id uint) error
 	GetDB() *gorm.DB
+	GetTicketsByFlightID(flightID uint) ([]*models.Ticket, error)
 }

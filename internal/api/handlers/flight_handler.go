@@ -2,6 +2,8 @@ package handlers
 
 import (
 	"net/http"
+	"strconv"
+	"time"
 
 	"github.com/aprilboiz/flight-management/internal/dto"
 	e "github.com/aprilboiz/flight-management/internal/exceptions"
@@ -162,4 +164,111 @@ func (f flightHandler) DeleteFlightByCode(c *gin.Context) {
 		return
 	}
 	c.Status(http.StatusNoContent)
+}
+
+// GetRevenueReport godoc
+//
+//	@Summary		Get revenue report
+//	@Description	Retrieve revenue statistics for flights in a specific month and year
+//	@Tags			reports
+//	@Accept			json
+//	@Produce		json
+//	@Param			month	query		int	true	"Month (1-12) or leave it blank for current month"
+//	@Param			year	query		int	true	"Year (e.g., 2024) or leave it blank for current year"
+//	@Success		200		{object}	dto.MonthlyRevenueReport
+//	@Failure		400		{object}	dto.ErrorResponse
+//	@Failure		500		{object}	dto.ErrorResponse
+//	@Router			/api/reports/revenue [get]
+func (h *flightHandler) GetRevenueReport(c *gin.Context) {
+	// Get year and month from query parameters
+	monthStr := c.Query("month")
+	yearStr := c.Query("year")
+
+	// Parse year
+	year, err := strconv.Atoi(yearStr)
+	if err != nil {
+		year = time.Now().Year()
+	}
+
+	// Parse month
+	month, err := strconv.Atoi(monthStr)
+	if err != nil {
+		month = int(time.Now().Month())
+	}
+
+	// Get revenue report
+	report, err := h.flightService.GetMonthlyRevenueReport(year, month)
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+
+	c.JSON(http.StatusOK, report)
+}
+
+// GetMonthlyRevenueReport godoc
+//
+//	@Summary		Get monthly revenue report
+//	@Description	Retrieve revenue statistics for flights in a specific month
+//	@Tags			reports
+//	@Accept			json
+//	@Produce		json
+//	@Param			month	query		int	true	"Month (1-12) or leave it blank for current month"
+//	@Success		200		{object}	dto.MonthlyRevenueReport
+//	@Failure		400		{object}	dto.ErrorResponse
+//	@Failure		500		{object}	dto.ErrorResponse
+//	@Router			/api/reports/revenue/monthly [get]
+func (h *flightHandler) GetMonthlyRevenueReport(c *gin.Context) {
+	// Get year and month from query parameters
+	monthStr := c.Query("month")
+
+	// Parse year
+	year := time.Now().Year()
+
+	// Parse month
+	month, err := strconv.Atoi(monthStr)
+	if err != nil {
+		month = int(time.Now().Month())
+	}
+
+	// Get revenue report
+	report, err := h.flightService.GetMonthlyRevenueReport(year, month)
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+
+	c.JSON(http.StatusOK, report)
+}
+
+// GetYearlyRevenueReport godoc
+//
+//	@Summary		Get yearly revenue report
+//	@Description	Retrieve revenue statistics for flights in a specific year
+//	@Tags			reports
+//	@Accept			json
+//	@Produce		json
+//	@Param			year	query		int	true	"Year (e.g., 2024) or leave it blank for current year"
+//	@Success		200		{object}	dto.YearlyRevenueReport
+//	@Failure		400		{object}	dto.ErrorResponse
+//	@Failure		500		{object}	dto.ErrorResponse
+//	@Router			/api/reports/revenue/yearly [get]
+func (h *flightHandler) GetYearlyRevenueReport(c *gin.Context) {
+	// Get year from query parameter
+	yearStr := c.Query("year")
+
+	// Parse year
+	year, err := strconv.Atoi(yearStr)
+	if err != nil {
+		year = time.Now().Year()
+	}
+
+	// Get revenue report
+	report, err := h.flightService.GetYearlyRevenueReport(year)
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+
+	c.JSON(http.StatusOK, report)
 }

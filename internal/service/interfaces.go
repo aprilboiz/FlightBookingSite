@@ -12,6 +12,8 @@ type FlightService interface {
 	GetFlightByCode(flightCode string) (*dto.FlightResponseDetailed, error)
 	Update(code string, flight *dto.FlightRequest) (*dto.FlightResponse, error)
 	Delete(code string) error
+	GetMonthlyRevenueReport(year int, month int) (*dto.MonthlyRevenueReport, error)
+	GetYearlyRevenueReport(year int) (*dto.YearlyRevenueReport, error)
 }
 
 type AirportService interface {
