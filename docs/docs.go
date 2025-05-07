@@ -234,7 +234,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.FlightResponse"
+                            "$ref": "#/definitions/dto.FlightResponseDetailed"
                         }
                     },
                     "404": {
@@ -906,7 +906,7 @@ const docTemplate = `{
                 "departure_airport": {
                     "type": "string"
                 },
-                "departure_date": {
+                "departure_date_time": {
                     "type": "string"
                 },
                 "duration": {
@@ -918,7 +918,7 @@ const docTemplate = `{
                 "flight_code": {
                     "type": "string"
                 },
-                "intermediate_stops": {
+                "intermediate_stop": {
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/dto.IntermediateStopDTO"
@@ -926,6 +926,59 @@ const docTemplate = `{
                 },
                 "plane_code": {
                     "type": "string"
+                },
+                "total_seats": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.FlightResponseDetailed": {
+            "type": "object",
+            "properties": {
+                "arrival_airport": {
+                    "type": "string"
+                },
+                "base_price": {
+                    "type": "number"
+                },
+                "booked_seats": {
+                    "type": "integer"
+                },
+                "departure_airport": {
+                    "type": "string"
+                },
+                "departure_date_time": {
+                    "type": "string"
+                },
+                "duration": {
+                    "type": "integer"
+                },
+                "empty_seats": {
+                    "type": "integer"
+                },
+                "flight_code": {
+                    "type": "string"
+                },
+                "intermediate_stop": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.IntermediateStopDTO"
+                    }
+                },
+                "plane_code": {
+                    "type": "string"
+                },
+                "seat_class_info": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.SeatClassInfo"
+                    }
+                },
+                "seats": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.SeatInfo"
+                    }
                 },
                 "total_seats": {
                     "type": "integer"
@@ -956,6 +1009,43 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "plane_name": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.SeatClassInfo": {
+            "type": "object",
+            "properties": {
+                "booked_seats": {
+                    "type": "integer"
+                },
+                "class_name": {
+                    "type": "string"
+                },
+                "empty_seats": {
+                    "type": "integer"
+                },
+                "total_seats": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.SeatInfo": {
+            "type": "object",
+            "properties": {
+                "booked_by": {
+                    "type": "string"
+                },
+                "class_name": {
+                    "type": "string"
+                },
+                "is_booked": {
+                    "type": "boolean"
+                },
+                "price": {
+                    "type": "number"
+                },
+                "seat_number": {
                     "type": "string"
                 }
             }

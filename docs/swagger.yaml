@@ -94,7 +94,7 @@ definitions:
         type: integer
       departure_airport:
         type: string
-      departure_date:
+      departure_date_time:
         type: string
       duration:
         type: integer
@@ -102,12 +102,47 @@ definitions:
         type: integer
       flight_code:
         type: string
-      intermediate_stops:
+      intermediate_stop:
         items:
           $ref: '#/definitions/dto.IntermediateStopDTO'
         type: array
       plane_code:
         type: string
+      total_seats:
+        type: integer
+    type: object
+  dto.FlightResponseDetailed:
+    properties:
+      arrival_airport:
+        type: string
+      base_price:
+        type: number
+      booked_seats:
+        type: integer
+      departure_airport:
+        type: string
+      departure_date_time:
+        type: string
+      duration:
+        type: integer
+      empty_seats:
+        type: integer
+      flight_code:
+        type: string
+      intermediate_stop:
+        items:
+          $ref: '#/definitions/dto.IntermediateStopDTO'
+        type: array
+      plane_code:
+        type: string
+      seat_class_info:
+        items:
+          $ref: '#/definitions/dto.SeatClassInfo'
+        type: array
+      seats:
+        items:
+          $ref: '#/definitions/dto.SeatInfo'
+        type: array
       total_seats:
         type: integer
     type: object
@@ -127,6 +162,30 @@ definitions:
       plane_code:
         type: string
       plane_name:
+        type: string
+    type: object
+  dto.SeatClassInfo:
+    properties:
+      booked_seats:
+        type: integer
+      class_name:
+        type: string
+      empty_seats:
+        type: integer
+      total_seats:
+        type: integer
+    type: object
+  dto.SeatInfo:
+    properties:
+      booked_by:
+        type: string
+      class_name:
+        type: string
+      is_booked:
+        type: boolean
+      price:
+        type: number
+      seat_number:
         type: string
     type: object
   dto.TicketRequest:
@@ -385,7 +444,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/dto.FlightResponse'
+            $ref: '#/definitions/dto.FlightResponseDetailed'
         "404":
           description: Not Found
           schema:
