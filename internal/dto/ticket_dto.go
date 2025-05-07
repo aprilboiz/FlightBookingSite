@@ -1,0 +1,36 @@
+package dto
+
+type TicketRequest struct {
+	FlightCode  string `json:"flight_code" binding:"required"`
+	SeatNumber  string `json:"seat_number" binding:"required"`
+	FullName    string `json:"full_name" binding:"required"`
+	IDCard      string `json:"id_card" binding:"required"`
+	PhoneNumber string `json:"phone_number" binding:"required"`
+	Email       string `json:"email" binding:"required,email"`
+	BookingType string `json:"booking_type" binding:"required,oneof=TICKET PLACE_ORDER"`
+}
+
+type TicketStatusUpdateRequest struct {
+	Status string `json:"status" binding:"required,oneof=ACTIVE CANCELLED EXPIRED"`
+}
+
+type TicketResponse struct {
+	ID           uint    `json:"id"`
+	FlightCode   string  `json:"flight_code"`
+	SeatNumber   string  `json:"seat_number"`
+	Price        float64 `json:"price"`
+	FullName     string  `json:"full_name"`
+	IDCard       string  `json:"id_card"`
+	PhoneNumber  string  `json:"phone_number"`
+	Email        string  `json:"email"`
+	TicketStatus string  `json:"ticket_status"`
+	BookingType  string  `json:"booking_type"`
+}
+
+type TicketStatusesResponse struct {
+	Statuses []string `json:"statuses"`
+}
+
+type BookingTypesResponse struct {
+	Types []string `json:"types"`
+}
