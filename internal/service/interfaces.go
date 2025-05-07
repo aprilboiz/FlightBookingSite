@@ -6,12 +6,12 @@ import (
 )
 
 type FlightService interface {
+	Create(flight *dto.FlightRequest) (*dto.FlightResponse, error)
 	GetAllFlights() ([]*dto.FlightResponse, error)
-	GetFlightByID(flightID int) (*dto.FlightResponse, error)
+	GetAllFlightsInList() ([]*dto.FlightListResponse, error)
 	GetFlightByCode(flightCode string) (*dto.FlightResponse, error)
-	Create(flightRequest *dto.FlightRequest) (*dto.FlightResponse, error)
-	Update(flightCode string, flightRequest *dto.FlightRequest) (*dto.FlightResponse, error)
-	DeleteByCode(code string) error
+	Update(code string, flight *dto.FlightRequest) (*dto.FlightResponse, error)
+	Delete(code string) error
 }
 
 type AirportService interface {
@@ -35,8 +35,12 @@ type FlightCodeGenerator interface {
 }
 
 type TicketService interface {
+	Create(ticket *dto.TicketRequest) (*dto.TicketResponse, error)
 	GetAllTickets() ([]*dto.TicketResponse, error)
 	GetTicketByID(id uint) (*dto.TicketResponse, error)
-	Create(ticket *dto.TicketRequest) (*dto.TicketResponse, error)
 	UpdateTicketStatus(ticketId uint, newStatus string) (*dto.TicketResponse, error)
+	DeleteTicket(id uint) error
+	CancelPlaceOrders(flightCode string) error
+	GetTicketStatuses() []string
+	GetBookingTypes() []string
 }
