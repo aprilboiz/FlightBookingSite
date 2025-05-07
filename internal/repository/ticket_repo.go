@@ -109,7 +109,7 @@ func (r *ticketRepository) GetTicketsByFlightID(flightID uint) ([]*models.Ticket
 		Where("flight_id = ?", flightID).
 		Find(&tickets)
 	if result.Error != nil {
-		return nil, result.Error
+		return nil, exceptions.Internal("failed to get tickets by flight ID", result.Error)
 	}
 	return tickets, nil
 }
