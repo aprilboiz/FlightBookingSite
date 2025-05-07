@@ -2,10 +2,11 @@ package repository
 
 import (
 	"errors"
+	"strconv"
+
 	"github.com/aprilboiz/flight-management/internal/exceptions"
 	"github.com/aprilboiz/flight-management/internal/models"
 	"gorm.io/gorm"
-	"strconv"
 )
 
 type flightRepository struct {
@@ -76,13 +77,19 @@ func (f flightRepository) Create(flight *models.Flight) (*models.Flight, error) 
 }
 
 func (f flightRepository) Update(flight *models.Flight) (*models.Flight, error) {
-	//TODO implement me
-	panic("implement me")
+	result := f.db.Save(flight)
+	if result.Error != nil {
+		return nil, exceptions.Internal("failed to update flight", result.Error)
+	}
+	return flight, nil
 }
 
 func (f flightRepository) Delete(flight *models.Flight) error {
-	//TODO implement me
-	panic("implement me")
+	result := f.db.Delete(flight)
+	if result.Error != nil {
+		return exceptions.Internal("failed to delete flight", result.Error)
+	}
+	return nil
 }
 
 func (f flightRepository) CreateIntermediateStops(stops []*models.IntermediateStop) ([]*models.IntermediateStop, error) {
@@ -105,4 +112,16 @@ func (f flightRepository) GetAvailableSeats(flightCode string) ([]*models.Seat, 
 		return nil, exceptions.Internal("failed to get available seats", result.Error)
 	}
 	return seats, nil
+}
+
+func (f flightRepository) DeleteIntermediateStops(flightID uint) error {
+	result := f.db.Where("flight_id = ?", flightID).Delete(&models.IntermediateStop{})
+	if result.Error != nil {
+		return exceptions.Internal("failed to delete intermediate stops", result.Error)
+	}
+	return nil
+}
+
+func (f flightRepository) GetDB() *gorm.DB {
+	return f.db
 }

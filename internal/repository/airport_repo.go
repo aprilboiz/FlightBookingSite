@@ -2,6 +2,7 @@ package repository
 
 import (
 	"errors"
+
 	"github.com/aprilboiz/flight-management/internal/exceptions"
 	"github.com/aprilboiz/flight-management/internal/models"
 	"gorm.io/gorm"
@@ -52,4 +53,8 @@ func (a airportRepository) GetByCodes(codes []string) (map[string]*models.Airpor
 	}
 
 	return airportMap, nil
+}
+
+func (a airportRepository) GetDB() *gorm.DB {
+	return a.db
 }

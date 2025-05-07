@@ -2,10 +2,11 @@ package repository
 
 import (
 	"errors"
+	"strconv"
+
 	"github.com/aprilboiz/flight-management/internal/exceptions"
 	"github.com/aprilboiz/flight-management/internal/models"
 	"gorm.io/gorm"
-	"strconv"
 )
 
 func NewPlaneRepository(db *gorm.DB) PlaneRepository {
@@ -69,4 +70,8 @@ func (p planeRepository) GetByID(id uint) (*models.Plane, error) {
 		return nil, exceptions.Internal("failed to get plane by id", result.Error)
 	}
 	return &plane, nil
+}
+
+func (p planeRepository) GetDB() *gorm.DB {
+	return p.db
 }

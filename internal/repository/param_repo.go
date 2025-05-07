@@ -35,3 +35,7 @@ func (p parameterRepository) UpdateParams(params *models.Parameter) (*models.Par
 	}
 	return &oldParams, nil
 }
+
+func (p parameterRepository) GetDB() *gorm.DB {
+	return p.db
+}
