@@ -27,3 +27,4 @@ go.work.sum
 *.code-workspace
 .idea
 logs
+*.log
