@@ -3,10 +3,11 @@ package database
 import (
 	"errors"
 	"fmt"
-	"github.com/aprilboiz/flight-management/pkg/config"
 	"log"
 	"os"
 	"time"
+
+	"github.com/aprilboiz/flight-management/pkg/config"
 
 	"github.com/aprilboiz/flight-management/internal/models"
 	"go.uber.org/zap"
@@ -151,10 +152,24 @@ func PeekUpcomingFlightId() (uint, error) {
 	db := database
 	var maxId uint
 
-	// Query the maximum ID currently in the flights table
-	err := db.Raw("SELECT COALESCE(MAX(id), 0) FROM flights").Scan(&maxId).Error
+	// Use a transaction to ensure consistency
+	err := db.Transaction(func(tx *gorm.DB) error {
+		// First, lock the flights table
+		if err := tx.Exec("LOCK TABLE flights IN EXCLUSIVE MODE").Error; err != nil {
+			zap.L().Error("Error locking flights table", zap.Error(err))
+			return err
+		}
+
+		// Then get the maximum ID
+		if err := tx.Raw("SELECT COALESCE(MAX(id), 0) FROM flights").Scan(&maxId).Error; err != nil {
+			zap.L().Error("Error getting max flight ID", zap.Error(err))
+			return err
+		}
+
+		return nil
+	})
+
 	if err != nil {
-		zap.L().Error("Error getting max flight ID", zap.Error(err))
 		return 0, err
 	}
 
