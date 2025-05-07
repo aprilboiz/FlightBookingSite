@@ -3,6 +3,7 @@ package service
 import (
 	"errors"
 	"fmt"
+	"sync"
 	"time"
 
 	"github.com/aprilboiz/flight-management/internal/dto"
@@ -23,23 +24,37 @@ type flightService struct {
 }
 
 type flightCodeGenerator struct {
+	mu            sync.Mutex
+	companyPrefix string
+	idFormat      string
 }
 
 func NewFlightCodeGenerator() FlightCodeGenerator {
-	return &flightCodeGenerator{}
+	return &flightCodeGenerator{
+		companyPrefix: "RuaAirline",
+		idFormat:      "%04d",
+	}
 }
 
 func (g *flightCodeGenerator) Generate() (string, error) {
+	g.mu.Lock()
+	defer g.mu.Unlock()
+
 	nextID, err := database.PeekUpcomingFlightId()
 	if err != nil {
 		return "", exceptions.Internal("failed to get next ID", err)
 	}
 
-	// Format the ID to have leading zeros up to 4 digits
-	formattedID := fmt.Sprintf("%04d", nextID)
+	// Format the ID according to the configured format
+	formattedID := fmt.Sprintf(g.idFormat, nextID)
 
-	// Prefix with company name
-	flightCode := "RuaAirline" + formattedID
+	// Combine prefix and formatted ID
+	flightCode := g.companyPrefix + formattedID
+
+	// Validate the generated code
+	if len(flightCode) > 20 { // Reasonable maximum length for a flight code
+		return "", exceptions.Internal("generated flight code exceeds maximum length", nil)
+	}
 
 	return flightCode, nil
 }
@@ -212,7 +227,7 @@ func (f flightService) GetAllFlights() ([]*dto.FlightResponse, error) {
 	return flightResponses, nil
 }
 
-func (f flightService) GetFlightByCode(flightCode string) (*dto.FlightResponse, error) {
+func (f flightService) GetFlightByCode(flightCode string) (*dto.FlightResponseDetailed, error) {
 	flight, err := f.flightRepo.GetByCode(flightCode)
 	if err != nil {
 		var appErr *exceptions.AppError
@@ -227,45 +242,93 @@ func (f flightService) GetFlightByCode(flightCode string) (*dto.FlightResponse, 
 		return nil, exceptions.Internal("Unexpected error retrieving flight", err)
 	}
 
-	// Get total seats for the plane
-	type PlaneSeatCount struct {
-		PlaneID    uint  `gorm:"column:plane_id"`
-		TotalSeats int64 `gorm:"column:total_seats"`
+	// Get seat counts using helper functions
+	totalSeats, err := f.getTotalSeatsForPlane(flight.PlaneID)
+	if err != nil {
+		return nil, err
 	}
-	var planeSeatCounts []PlaneSeatCount
-	result := f.planeRepo.GetDB().Model(&models.Seat{}).
-		Select("plane_id, COUNT(*) as total_seats").
-		Where("plane_id = ?", flight.PlaneID).
-		Group("plane_id").
-		Find(&planeSeatCounts)
-	if result.Error != nil {
-		return nil, exceptions.Internal("failed to count total seats", result.Error)
-	}
-
-	// Get booked seats for the flight
-	type FlightBookedCount struct {
-		FlightID    uint  `gorm:"column:flight_id"`
-		BookedSeats int64 `gorm:"column:booked_seats"`
-	}
-	var flightBookedCounts []FlightBookedCount
-	result = f.ticketRepo.GetDB().Model(&models.Ticket{}).
-		Select("flight_id, COUNT(*) as booked_seats").
-		Where("flight_id = ? AND ticket_status = ?", flight.ID, models.TicketStatusActive).
-		Group("flight_id").
-		Find(&flightBookedCounts)
-	if result.Error != nil {
-		return nil, exceptions.Internal("failed to count booked seats", result.Error)
-	}
-
-	// Calculate seat counts
-	var totalSeats, bookedSeats int64
-	if len(planeSeatCounts) > 0 {
-		totalSeats = planeSeatCounts[0].TotalSeats
-	}
-	if len(flightBookedCounts) > 0 {
-		bookedSeats = flightBookedCounts[0].BookedSeats
+	bookedSeats, err := f.getBookedSeatsForFlight(flight.ID)
+	if err != nil {
+		return nil, err
 	}
 	emptySeats := totalSeats - bookedSeats
+
+	// Get seat information by class
+	type SeatClassCount struct {
+		Class       string `gorm:"column:ticket_class_name"`
+		TotalSeats  int64  `gorm:"column:total_seats"`
+		BookedSeats int64  `gorm:"column:booked_seats"`
+	}
+	var seatClassCounts []SeatClassCount
+	result := f.planeRepo.GetDB().Model(&models.Seat{}).
+		Select("ticket_classes.ticket_class_name, COUNT(*) as total_seats").
+		Joins("JOIN ticket_classes ON ticket_classes.id = seats.ticket_class_id").
+		Where("seats.plane_id = ?", flight.PlaneID).
+		Group("ticket_classes.ticket_class_name").
+		Find(&seatClassCounts)
+	if result.Error != nil {
+		return nil, exceptions.Internal("failed to get seat class counts", result.Error)
+	}
+
+	// Get booked seats by class
+	for i := range seatClassCounts {
+		var bookedCount int64
+		result := f.ticketRepo.GetDB().Model(&models.Ticket{}).
+			Joins("JOIN seats ON seats.id = tickets.seat_id").
+			Joins("JOIN ticket_classes ON ticket_classes.id = seats.ticket_class_id").
+			Where("tickets.flight_id = ? AND tickets.ticket_status = ? AND ticket_classes.ticket_class_name = ?",
+				flight.ID, models.TicketStatusActive, seatClassCounts[i].Class).
+			Count(&bookedCount)
+		if result.Error != nil {
+			return nil, exceptions.Internal("failed to get booked seats by class", result.Error)
+		}
+		seatClassCounts[i].BookedSeats = bookedCount
+	}
+
+	// Get all seats for the plane with their booking status
+	var seats []models.Seat
+	result = f.planeRepo.GetDB().
+		Preload("TicketClass").
+		Where("plane_id = ?", flight.PlaneID).
+		Find(&seats)
+	if result.Error != nil {
+		return nil, exceptions.Internal("failed to get seats", result.Error)
+	}
+
+	// Get all active tickets for this flight
+	var tickets []models.Ticket
+	result = f.ticketRepo.GetDB().
+		Where("flight_id = ? AND ticket_status = ?", flight.ID, models.TicketStatusActive).
+		Find(&tickets)
+	if result.Error != nil {
+		return nil, exceptions.Internal("failed to get tickets", result.Error)
+	}
+
+	// Create a map of seat ID to ticket for quick lookup
+	ticketMap := make(map[uint]*models.Ticket)
+	for i := range tickets {
+		ticketMap[tickets[i].SeatID] = &tickets[i]
+	}
+
+	// Create detailed seat information
+	seatInfo := make([]dto.SeatInfo, len(seats))
+	for i, seat := range seats {
+		ticket := ticketMap[seat.ID]
+		price := flight.BasePrice * seat.TicketClass.PricePercentage
+
+		seatInfo[i] = dto.SeatInfo{
+			SeatNumber: seat.SeatNumber,
+			ClassName:  seat.TicketClass.TicketClassName,
+			IsBooked:   ticket != nil,
+			BookedBy: func() string {
+				if ticket != nil {
+					return ticket.FullName
+				}
+				return ""
+			}(),
+			Price: price,
+		}
+	}
 
 	// Map intermediate stops
 	intermediateStopDTOs := make([]dto.IntermediateStopDTO, len(flight.IntermediateStops))
@@ -278,7 +341,18 @@ func (f flightService) GetFlightByCode(flightCode string) (*dto.FlightResponse, 
 		}
 	}
 
-	return &dto.FlightResponse{
+	// Create seat class information
+	seatClassInfo := make([]dto.SeatClassInfo, len(seatClassCounts))
+	for i, count := range seatClassCounts {
+		seatClassInfo[i] = dto.SeatClassInfo{
+			ClassName:   count.Class,
+			TotalSeats:  int(count.TotalSeats),
+			BookedSeats: int(count.BookedSeats),
+			EmptySeats:  int(count.TotalSeats - count.BookedSeats),
+		}
+	}
+
+	return &dto.FlightResponseDetailed{
 		FlightCode:        flight.FlightCode,
 		DepartureAirport:  flight.DepartureAirport.AirportCode,
 		ArrivalAirport:    flight.ArrivalAirport.AirportCode,
@@ -290,6 +364,8 @@ func (f flightService) GetFlightByCode(flightCode string) (*dto.FlightResponse, 
 		EmptySeats:        int(emptySeats),
 		BookedSeats:       int(bookedSeats),
 		TotalSeats:        int(totalSeats),
+		SeatClassInfo:     seatClassInfo,
+		Seats:             seatInfo,
 	}, nil
 }
 

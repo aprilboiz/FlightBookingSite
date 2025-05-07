@@ -9,7 +9,7 @@ type FlightService interface {
 	Create(flight *dto.FlightRequest) (*dto.FlightResponse, error)
 	GetAllFlights() ([]*dto.FlightResponse, error)
 	GetAllFlightsInList() ([]*dto.FlightListResponse, error)
-	GetFlightByCode(flightCode string) (*dto.FlightResponse, error)
+	GetFlightByCode(flightCode string) (*dto.FlightResponseDetailed, error)
 	Update(code string, flight *dto.FlightRequest) (*dto.FlightResponse, error)
 	Delete(code string) error
 }
