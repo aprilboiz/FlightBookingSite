@@ -17,7 +17,7 @@ type ticketService struct {
 	paramRepo  repository.ParameterRepository
 }
 
-func (t ticketService) GetAllTickets() ([]*dto.TicketResponse, error) {
+func (t *ticketService) GetAllTickets() ([]*dto.TicketResponse, error) {
 	allTickets, err := t.ticketRepo.GetAll()
 	tickets := make([]*dto.TicketResponse, 0)
 	if err != nil {
@@ -40,7 +40,7 @@ func (t ticketService) GetAllTickets() ([]*dto.TicketResponse, error) {
 	return tickets, nil
 }
 
-func (t ticketService) GetTicketByID(id uint) (*dto.TicketResponse, error) {
+func (t *ticketService) GetTicketByID(id uint) (*dto.TicketResponse, error) {
 	ticket, err := t.ticketRepo.GetByID(id)
 	if err != nil {
 		return nil, err
@@ -59,14 +59,14 @@ func (t ticketService) GetTicketByID(id uint) (*dto.TicketResponse, error) {
 	}, nil
 }
 
-func (t ticketService) Create(ticket *dto.TicketRequest) (*dto.TicketResponse, error) {
+func (t *ticketService) Create(ticket *dto.TicketRequest) (*dto.TicketResponse, error) {
 	// 1. Validate flight exists and is not in the past
 	flight, err := t.flightRepo.GetByCode(ticket.FlightCode)
 	if err != nil {
 		return nil, err
 	}
 
-	// Check if flight is in the past
+	// Check if a flight is in the past
 	if flight.DepartureDateTime.Before(time.Now()) {
 		return nil, exceptions.BadRequest("cannot book ticket for a past flight", nil)
 	}
@@ -77,7 +77,7 @@ func (t ticketService) Create(ticket *dto.TicketRequest) (*dto.TicketResponse, e
 		return nil, err
 	}
 
-	// Check if seat is already booked for this flight
+	// Check if a seat is already booked for this flight
 	var existingTicket models.Ticket
 	result := t.ticketRepo.GetDB().Where("flight_id = ? AND seat_id = ?", flight.ID, seat.ID).First(&existingTicket)
 	if result.Error == nil {
@@ -99,7 +99,7 @@ func (t ticketService) Create(ticket *dto.TicketRequest) (*dto.TicketResponse, e
 			return nil, err
 		}
 
-		// Check if place order is within allowed time window
+		// Check if place order is within the allowed time window
 		daysBefore := time.Duration(params.LatestTicketPurchaseTime) * 24 * time.Hour
 		deadline := flight.DepartureDateTime.Add(-daysBefore)
 		if time.Now().After(deadline) {
@@ -140,14 +140,14 @@ func (t ticketService) Create(ticket *dto.TicketRequest) (*dto.TicketResponse, e
 	}, nil
 }
 
-func (t ticketService) ConvertPlaceOrderToTicket(placeOrderID uint) (*dto.TicketResponse, error) {
+func (t *ticketService) ConvertPlaceOrderToTicket(placeOrderID uint) (*dto.TicketResponse, error) {
 	// 1. Get the place order
 	placeOrder, err := t.ticketRepo.GetByID(placeOrderID)
 	if err != nil {
 		return nil, err
 	}
 
-	// 2. Validate it's a place order
+	// 2. Validate it a place order
 	if placeOrder.BookingType != models.BookingTypePlaceOrder {
 		return nil, exceptions.BadRequest("this is not a place order", nil)
 	}
@@ -164,7 +164,7 @@ func (t ticketService) ConvertPlaceOrderToTicket(placeOrderID uint) (*dto.Ticket
 		return nil, err
 	}
 
-	// 5. Check if conversion is within allowed time window
+	// 5. Check if conversion is within an allowed time window
 	daysBefore := time.Duration(params.LatestTicketPurchaseTime) * 24 * time.Hour
 	deadline := flight.DepartureDateTime.Add(-daysBefore)
 	if time.Now().After(deadline) {
@@ -195,7 +195,7 @@ func (t ticketService) ConvertPlaceOrderToTicket(placeOrderID uint) (*dto.Ticket
 	}, nil
 }
 
-func (t ticketService) CancelPlaceOrders(flightCode string) error {
+func (t *ticketService) CancelPlaceOrders(flightCode string) error {
 	// Get the flight
 	flight, err := t.flightRepo.GetByCode(flightCode)
 	if err != nil {
@@ -208,7 +208,7 @@ func (t ticketService) CancelPlaceOrders(flightCode string) error {
 		return err
 	}
 
-	// Update each place order to expired status
+	// Update each place to expire status
 	for _, ticket := range tickets {
 		if ticket.BookingType == models.BookingTypePlaceOrder {
 			if err := t.ticketRepo.UpdateTicketStatus(ticket.ID, models.TicketStatusExpired); err != nil {
@@ -220,7 +220,7 @@ func (t ticketService) CancelPlaceOrders(flightCode string) error {
 	return nil
 }
 
-func (t ticketService) UpdateTicketStatus(ticketID uint, newStatus string) (*dto.TicketResponse, error) {
+func (t *ticketService) UpdateTicketStatus(ticketID uint, newStatus string) (*dto.TicketResponse, error) {
 	// Get the ticket
 	ticket, err := t.ticketRepo.GetByID(ticketID)
 	if err != nil {
@@ -256,7 +256,7 @@ func (t ticketService) UpdateTicketStatus(ticketID uint, newStatus string) (*dto
 		return nil, err
 	}
 
-	// Get updated ticket
+	// Get an updated ticket
 	updatedTicket, err := t.ticketRepo.GetByID(ticketID)
 	if err != nil {
 		return nil, err
@@ -277,7 +277,7 @@ func (t ticketService) UpdateTicketStatus(ticketID uint, newStatus string) (*dto
 	}, nil
 }
 
-func (t ticketService) DeleteTicket(id uint) error {
+func (t *ticketService) DeleteTicket(id uint) error {
 	// Validate ticket exists
 	_, err := t.ticketRepo.GetByID(id)
 	if err != nil {

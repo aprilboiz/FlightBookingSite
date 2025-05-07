@@ -18,6 +18,7 @@ type flightHandler struct {
 }
 
 // GetAllFlightsInList godoc
+//
 //	@Summary		Get all flights in list format
 //	@Description	Retrieve a list of all flights with simplified information
 //	@Tags			flights
@@ -36,6 +37,7 @@ func (f flightHandler) GetAllFlightsInList(c *gin.Context) {
 }
 
 // GetAllFlights godoc
+//
 //	@Summary		Get all flights
 //	@Description	Retrieve a list of all flights
 //	@Tags			flights
@@ -54,13 +56,14 @@ func (f flightHandler) GetAllFlights(c *gin.Context) {
 }
 
 // GetFlightByCode godoc
+//
 //	@Summary		Get flight by code
 //	@Description	Retrieve a flight by its unique code
 //	@Tags			flights
 //	@Accept			json
 //	@Produce		json
 //	@Param			code	path		string	true	"Flight Code"
-//	@Success		200		{object}	dto.FlightResponse
+//	@Success		200		{object}	dto.FlightResponseDetailed
 //	@Failure		404		{object}	dto.ErrorResponse
 //	@Failure		500		{object}	dto.ErrorResponse
 //	@Router			/api/flights/{code} [get]
@@ -75,6 +78,7 @@ func (f flightHandler) GetFlightByCode(c *gin.Context) {
 }
 
 // CreateFlight godoc
+//
 //	@Summary		Create a new flight
 //	@Description	Create a new flight with the provided information
 //	@Tags			flights
@@ -105,6 +109,7 @@ func (f flightHandler) CreateFlight(c *gin.Context) {
 }
 
 // UpdateFlight godoc
+//
 //	@Summary		Update a flight
 //	@Description	Update an existing flight with the provided information
 //	@Tags			flights
@@ -139,6 +144,7 @@ func (f flightHandler) UpdateFlight(c *gin.Context) {
 }
 
 // DeleteFlightByCode godoc
+//
 //	@Summary		Delete a flight
 //	@Description	Delete a flight by its unique code
 //	@Tags			flights
