@@ -6,6 +6,7 @@ import dayjs from "dayjs";
 import { PlusOutlined } from "@ant-design/icons";
 import { getPlane } from "../services/planeService.js";
 import { addFlight } from "../services/flightService.js";
+import { getParameter } from "../services/parameterService.js";
 
 const { Title } = Typography;
 const { Option } = Select;
@@ -14,6 +15,7 @@ const CalenderPlane = () => {
   const [airports, setAirports] = useState([]);
   const [planes, setPlanes] = useState([]);
   const [stopAirports, setStopAirports] = useState([]);
+  const [parameter, setParameter] = useState([]);
 
   const navigate = useNavigate();
 
@@ -41,9 +43,23 @@ const CalenderPlane = () => {
     }
   };
 
+  const fetchParameter = async () => {
+    try {
+      const data = await getParameter();
+      setParameter(data);
+      console.log("Parameter data:", parameter);
+    } catch (error) {
+      notification.error({
+        message: "Lỗi",
+        description: "Không thể lấy danh sách tham số",
+      });
+    }
+  };
+
   useEffect(() => {
     fetchAirports();
     fetchPlane();
+    fetchParameter();
   }, []);
 
   const onFinish = async (values) => {
@@ -82,7 +98,7 @@ const CalenderPlane = () => {
     }
 
     const hasInvalidStopTime = stopAirports.some(
-      (stop) => stop.time < 10 || stop.time > 20
+      (stop) => stop.time < parameter.min_intermediate_stop_duration || stop.time > parameter.max_intermediate_stop_duration
     );
     if (hasInvalidStopTime) {
       notification.error({
@@ -131,7 +147,7 @@ const CalenderPlane = () => {
   };
 
   const addStopAirport = () => {
-    if (stopAirports.length >= 2) return;
+    if (stopAirports.length >= parameter.max_intermediate_stops) return;
     setStopAirports([
       ...stopAirports,
       { key: Date.now().toString(), airport: "", time: 0, note: "" },
@@ -189,13 +205,13 @@ const CalenderPlane = () => {
             { required: true, message: "Vui lòng nhập thời gian bay" },
             {
               validator: (_, value) =>
-                value >= 30
+                value >= parameter.min_flight_duration
                   ? Promise.resolve()
-                  : Promise.reject("Thời gian bay phải lớn hơn 30 phút"),
+                  : Promise.reject(`Thời gian bay phải lớn hơn ${parameter.min_flight_duration} phút`),
             },
           ]}
         >
-          <InputNumber className="w-full" min={30} />
+          <InputNumber className="w-full" min={parameter.min_flight_duration} />
         </Form.Item>
 
         <Form.Item

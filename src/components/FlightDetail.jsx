@@ -50,7 +50,7 @@ const FlightDetail = () => {
     return <div className="text-center mt-10">Đang tải dữ liệu...</div>;
   }
 
-  const departureDate = new Date(flight.departure_date)
+  const departureDate = new Date(flight.departure_date_time)
   const arrivalDate = new Date(departureDate.getTime() + flight.duration * 60000);
   const formatTime = (date) => {
     return date.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
@@ -69,7 +69,7 @@ const FlightDetail = () => {
             <div className='w-52 h-[1px] bg-black'></div>
             <FaPlane />
           </div>
-          <p>{flight.intermediate_stops.length > 0 ? `${flight.intermediate_stops.length} điểm dừng` : `Bay thẳng`}</p>
+          <p>{flight.intermediate_stop.length > 0 ? `${flight.intermediate_stop.length} điểm dừng` : `Bay thẳng`}</p>
         </div>
         <div>
           <h3 className='text-2xl font-medium'>{formatTime(arrivalDate)}</h3>
@@ -113,7 +113,7 @@ const FlightDetail = () => {
         </div>
       </div>
       <hr className='bg-black w-3/4 h-[1px]'/>
-      {flight.intermediate_stops.length > 0 && (
+      {flight.intermediate_stop.length > 0 && (
         <>
           <h2 className='text-xl mt-10 font-light'>Thông tin chi tiết chuyến bay trung gian</h2>
           {flight.intermediate_stops.map((item, index) => (
