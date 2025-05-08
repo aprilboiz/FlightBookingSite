@@ -23,6 +23,7 @@ type ServerConfig struct {
 
 type DatabaseConfig struct {
 	Port     int                `yaml:"port"`
+	Host     string             `yaml:"host"`
 	Type     string             `yaml:"type"`
 	User     string             `yaml:"user"`
 	Password string             `yaml:"password"`
@@ -92,7 +93,7 @@ func GetConfig() *Config {
 
 func GetDatabaseConnectionString() string {
 	return fmt.Sprintf("host=%s port=%d user=%s dbname=%s password=%s TimeZone=%s",
-		GetConfig().Server.Host,
+		GetConfig().Database.Host,
 		GetConfig().Database.Port,
 		GetConfig().Database.User,
 		GetConfig().Database.Name,

@@ -6,6 +6,7 @@ server:
 
 database:
   port: 5432
+  host: localhost
   type: postgres
   user: postgres
   password: "postgres"
