@@ -41,7 +41,7 @@ func SetupRoutes(router *gin.Engine, h Handlers) {
 		})
 	})
 
-	docs.SwaggerInfo.BasePath = "/api"
+	docs.SwaggerInfo.BasePath = "/"
 	v1 := router.Group("/api")
 	{
 		flightRoutes := v1.Group("/flights")
