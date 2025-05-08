@@ -8,6 +8,8 @@ import { getFlightByCode } from '../services/flightService';
 import { notification } from 'antd';
 import { getPlaneByCode } from '../services/planeService';
 
+import dayjs from "dayjs";
+
 const FlightDetail = () => {
 
   const { code } = useParams();
@@ -98,7 +100,7 @@ const FlightDetail = () => {
           </div>
           <div className='flex items-center justify-center gap-6'>
             <CiCalendarDate className='text-3xl'/>
-            <p className='text-base font-light'>{`${departureDate.getDate()} - ${departureDate.getMonth()} - ${departureDate.getFullYear()}`}</p>
+            <p className='text-base font-light'>{`${dayjs(flight.departure_date_time).format("YYYY-MM-DD HH:mm:ss A")}`}</p>
           </div>
         </div>
         <div className='flex flex-col items-center justify-center gap-10'>

@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { Form, Input, Select, Card, Button } from "antd";
 import { getFlightByCode } from "../services/flightService.js";
+import { addTicket, getBookingTypes } from "../services/ticketService.js";
+import { notification } from "antd";
+
 
 const { Option } = Select;
 
@@ -8,6 +11,7 @@ const TicketBooking = ({ selectedFlight }) => {
   const [form] = Form.useForm();
   const [ticketPrice, setTicketPrice] = useState("0 VND");
   const [ticketClasses, setTicketClasses] = useState([]);
+  const [ticketTypes, setTicketTypes] = useState([]);
   const [seats, setSeats] = useState([]);
   const [selectedClass, setSelectedClass] = useState(null);
 
@@ -20,10 +24,12 @@ const TicketBooking = ({ selectedFlight }) => {
         }
       )
       getFlightDetails(selectedFlight.flight_code);
+      getTicketTypes();
     } else {
       form.resetFields();
       setTicketPrice("0 VND");
       setTicketClasses([]);
+      setTicketTypes([]);
       setSeats([]);
       setSelectedClass(null);
     }
@@ -48,6 +54,18 @@ const TicketBooking = ({ selectedFlight }) => {
       });
     }
   }
+
+  const getTicketTypes = async () => {
+    try {
+      const data = await getBookingTypes();
+      setTicketTypes(data.types);
+    } catch (error) {
+      notification.error({
+        message: "Lỗi",
+        description: "Không thể tải loại vé",
+      });
+    }
+  };
 
   const calculatePrice = (ticketClass) => {
     const seat = seats.find((seat) => seat.class_name === ticketClass);
@@ -75,7 +93,7 @@ const TicketBooking = ({ selectedFlight }) => {
     }
 
     const ticketData = {
-      booking_type: "TICKET",
+      booking_type: values.ticketType,
       email: values.email || "",
       flight_code: selectedFlight.flight_code,
       full_name: values.passenger,
@@ -83,7 +101,23 @@ const TicketBooking = ({ selectedFlight }) => {
       phone_number: values.phone,
       seat_number: values.seat_number,
     };
-
+    try {
+      await addTicket(ticketData);
+      notification.success({
+        message: "Thành công",
+        description: "Đặt vé thành công",
+      });
+      form.resetFields();
+      setTicketPrice("0 VND");
+      setTicketClasses([]);
+      setSeats([]);
+      setSelectedClass(null);
+    } catch (error) {
+      notification.error({
+        message: "Lỗi",
+        description: error.message || "Có lỗi xảy ra khi đặt vé",
+      });
+    }
     console.log("Ticket data:", ticketData);
   };
   return (
@@ -91,6 +125,24 @@ const TicketBooking = ({ selectedFlight }) => {
       <Form form={form} layout="vertical" onFinish={handleSubmit}>
         <Form.Item label="Chuyến bay" name="flightCode">
           <Input placeholder="Chọn chuyến bay" disabled />
+        </Form.Item>
+
+        <Form.Item
+          label="Loại vé"
+          name="ticketType"
+          rules={[{ required: true, message: "Vui lòng chọn loại vé" }]}
+        >
+          <Select
+            placeholder="Chọn loại vé"
+            onChange={handleClassChange}
+            disabled={!selectedFlight}
+          >
+            {ticketTypes.map((cls) => (
+              <Option key={cls} value={cls}>
+                {cls}
+              </Option>
+            ))}
+          </Select>
         </Form.Item>
 
         <Form.Item

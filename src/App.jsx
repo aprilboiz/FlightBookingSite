@@ -8,6 +8,8 @@ import ListPlane from "./components/ListPlane";
 import SaleTicket from "./components/SaleTicket";
 import Test from "./components/test";
 import FlightDetail from "./components/FlightDetail";
+import ListTicket from "./components/ListTicket";
+import RegulationForm from "./components/RegulationForm";
 
 const { Header, Sider, Content } = Layout;
 function App() {
@@ -25,6 +27,8 @@ function App() {
             <Route path="/list-plane" element={<ListPlane />} />
             <Route path="/list-plane/:code" element={<FlightDetail />} />
             <Route path="/sale-ticket" element={<SaleTicket />} />
+            <Route path="/list-ticket" element={<ListTicket />} />
+            <Route path="/regulation" element={<RegulationForm />} />
           </Routes>
         </div>
         <div className="fixed bottom-4 right-4 z-50">

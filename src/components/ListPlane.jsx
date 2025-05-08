@@ -45,7 +45,7 @@ const ListPlane = () => {
         flightCode: item.flight_code,
         departureAirport: item.departure_airport,
         arrivalAirport: item.arrival_airport,
-        departureTime: item.departure_date,
+        departureTime: item.departure_date_time,
         price: item.base_price,
         empty_seat: item.empty_seats,
         booked_seat: item.booked_seats,

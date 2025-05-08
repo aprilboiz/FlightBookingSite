@@ -10,3 +10,16 @@ export const getParameter = async () => {
         console.error("Error fetching parameters:", error);
     }
 }
+
+export const updateParameter = async (params) => {
+    try {
+        const response = await axios.put(`${API_BASE_URL}/params`, params, {
+            headers: {
+                "Content-Type": "application/json",
+            },
+        });
+        return response.data;
+    } catch (error) {
+        console.error("Error updating parameters:", error);
+    }
+}

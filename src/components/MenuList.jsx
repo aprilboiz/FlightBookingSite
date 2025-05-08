@@ -18,6 +18,12 @@ const MenuList = () => {
         <Menu.Item key="sale-ticket" icon={<CreditCardOutlined />}>
             <Link to="/sale-ticket">Vé máy bay</Link>
         </Menu.Item>
+        <Menu.Item key="list-ticket" icon={<CreditCardOutlined />}>
+            <Link to="/list-ticket">Danh sách vé chuyến bay</Link>
+        </Menu.Item>
+        <Menu.Item key="regulation" icon={<CreditCardOutlined />}>
+            <Link to="/regulation">Thay đổi qui định</Link>
+        </Menu.Item>
     </Menu>
   )
 }

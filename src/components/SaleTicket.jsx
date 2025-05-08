@@ -3,6 +3,8 @@ import { Input, Table, notification } from "antd";
 import TicketBooking from "./TicketBooking";
 import { getFlights } from "../services/flightService.js";
 
+import dayjs from "dayjs";
+
 const { Search } = Input;
 
 const SaleTicket = () => {
@@ -17,8 +19,16 @@ const SaleTicket = () => {
   const fetchFlights = async () => {
     try {
       const data = await getFlights();
-      setFlights(data);
-      setFilteredFlights(data);
+      console.log(data)
+      const formatted = data.map((item, index) => ({
+        key: index,
+        flight_code: item.flight_code,
+        departure_airport: item.departure_airport,
+        arrival_airport: item.arrival_airport,
+        departure_date_time: item.departure_date_time,
+      }));
+      setFlights(formatted);
+      setFilteredFlights(formatted);
     } catch (error) {
       notification.error({
         message: "Lỗi",
@@ -74,6 +84,7 @@ const SaleTicket = () => {
               title: "Thời gian",
               dataIndex: "departure_date_time",
               key: "departure_date_time",
+              render: (text) => dayjs(text).format("YYYY-MM-DD HH:mm:ss"),
             },
           ]}
         />
