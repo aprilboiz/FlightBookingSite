@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"sync"
 	"time"
+	_ "time/tzdata"
 
 	"github.com/aprilboiz/flight-management/internal/dto"
 	"github.com/aprilboiz/flight-management/internal/exceptions"
