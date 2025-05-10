@@ -11,7 +11,7 @@ export const addTicket = async (ticketData) => {
         });
         return response.data;
     } catch (error) {
-        throw new Error(error.response?.data?.message || 'Có lỗi xảy ra khi thêm vé máy bay');
+        throw new Error(error.response?.data?.details || 'Có lỗi xảy ra khi thêm vé máy bay');
     }
 }
 

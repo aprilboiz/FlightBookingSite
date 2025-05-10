@@ -24,6 +24,9 @@ const MenuList = () => {
         <Menu.Item key="regulation" icon={<CreditCardOutlined />}>
             <Link to="/regulation">Thay đổi qui định</Link>
         </Menu.Item>
+        <Menu.Item key="report" icon={<CreditCardOutlined />}>
+            <Link to="/report">Báo cáo doanh thu</Link>
+        </Menu.Item>
     </Menu>
   )
 }

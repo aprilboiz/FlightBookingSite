@@ -64,7 +64,7 @@ const RegulationForm = () => {
           <InputNumber min={1} style={{ width: "100%" }} />
         </Form.Item>
 
-        <Form.Item label="TG mua vé chậm nhất (phút trước giờ bay)" name="latest_ticket_purchase_time" rules={[{ required: true }]}>
+        <Form.Item label="TG mua vé chậm nhất (ngày)" name="latest_ticket_purchase_time" rules={[{ required: true }]}>
           <InputNumber min={0} style={{ width: "100%" }} />
         </Form.Item>
 

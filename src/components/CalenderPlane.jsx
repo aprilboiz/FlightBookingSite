@@ -1,7 +1,18 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { getAirports } from "../services/airportService.js";
-import {Form, Input, Typography, Select, InputNumber, Button, notification, DatePicker, Space, message,} from "antd";
+import {
+  Form,
+  Input,
+  Typography,
+  Select,
+  InputNumber,
+  Button,
+  notification,
+  DatePicker,
+  Space,
+  message,
+} from "antd";
 import dayjs from "dayjs";
 import { PlusOutlined } from "@ant-design/icons";
 import { getPlane } from "../services/planeService.js";
@@ -63,7 +74,14 @@ const CalenderPlane = () => {
   }, []);
 
   const onFinish = async (values) => {
-    const { departureAirport, arrivalAirport, duration, departureTime, flightCode, price } = values;
+    const {
+      departureAirport,
+      arrivalAirport,
+      duration,
+      departureTime,
+      flightCode,
+      price,
+    } = values;
 
     if (departureAirport === arrivalAirport) {
       notification.error({
@@ -98,7 +116,9 @@ const CalenderPlane = () => {
     }
 
     const hasInvalidStopTime = stopAirports.some(
-      (stop) => stop.time < parameter.min_intermediate_stop_duration || stop.time > parameter.max_intermediate_stop_duration
+      (stop) =>
+        stop.time < parameter.min_intermediate_stop_duration ||
+        stop.time > parameter.max_intermediate_stop_duration
     );
     if (hasInvalidStopTime) {
       notification.error({
@@ -131,7 +151,7 @@ const CalenderPlane = () => {
         message: "Thành công",
         description: "Chuyến bay đã được thêm thành công",
       });
-      navigate("/list-plane")
+      navigate("/list-plane");
     } catch (error) {
       notification.error({
         message: "Lỗi",
@@ -207,7 +227,9 @@ const CalenderPlane = () => {
               validator: (_, value) =>
                 value >= parameter.min_flight_duration
                   ? Promise.resolve()
-                  : Promise.reject(`Thời gian bay phải lớn hơn ${parameter.min_flight_duration} phút`),
+                  : Promise.reject(
+                      `Thời gian bay phải lớn hơn ${parameter.min_flight_duration} phút`
+                    ),
             },
           ]}
         >
@@ -292,10 +314,19 @@ const CalenderPlane = () => {
                 setStopAirports(updated);
               }}
             />
+            <Button
+              type="danger"
+              onClick={() => {
+                const updated = stopAirports.filter((_, i) => i !== index);
+                setStopAirports(updated);
+              }}
+            >
+              Xóa
+            </Button>
           </Space>
         ))}
 
-        {stopAirports.length < 2 && (
+        {stopAirports.length < parameter.max_intermediate_stops && (
           <Button
             icon={<PlusOutlined />}
             onClick={addStopAirport}

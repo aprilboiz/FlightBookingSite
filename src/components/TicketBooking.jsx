@@ -134,7 +134,6 @@ const TicketBooking = ({ selectedFlight }) => {
         >
           <Select
             placeholder="Chọn loại vé"
-            onChange={handleClassChange}
             disabled={!selectedFlight}
           >
             {ticketTypes.map((cls) => (
@@ -184,7 +183,7 @@ const TicketBooking = ({ selectedFlight }) => {
             disabled={!selectedFlight}
           >
             {ticketClasses.map((cls) => (
-              <Option key={cls} value={cls}>
+              <Option key={cls} value={cls} defaultSeat={cls}>
                 {cls}
               </Option>
             ))}
