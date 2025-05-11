@@ -249,6 +249,16 @@ func (t *ticketService) UpdateTicketStatus(ticketID uint, newStatus string) (*dt
 		if time.Now().After(deadline) {
 			return nil, exceptions.BadRequest(fmt.Sprintf("cannot cancel ticket after %d days before departure", params.TicketCancellationTime), nil)
 		}
+
+		// Check if the ticket is already cancelled
+		if ticket.TicketStatus == models.TicketStatusCancelled {
+			return nil, exceptions.BadRequest("ticket is already cancelled", nil)
+		}
+
+		// Check if the ticket is already used
+		if ticket.TicketStatus == models.TicketStatusUsed {
+			return nil, exceptions.BadRequest("cannot cancel a used ticket", nil)
+		}
 	}
 
 	// Update ticket status
