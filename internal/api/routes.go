@@ -14,10 +14,10 @@ import (
 )
 
 func SetupRoutes(router *gin.Engine, h Handlers) {
-	// Global middleware (e.g., logging, CORS - if needed)
-	// router.Use(middleware.Logger())
-	// router.Use(middleware.Cors())
+	// Global middleware
+	router.Use(middleware.Logger())
 	router.Use(middleware.ErrorHandler(h.Logger))
+
 	router.NoRoute(func(c *gin.Context) {
 		_ = c.Error(&ex.AppError{
 			Code:    http.StatusText(http.StatusNotFound),
