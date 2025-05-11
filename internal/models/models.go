@@ -3,7 +3,15 @@ package models
 import (
 	"time"
 
+	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
+)
+
+// User role constants
+const (
+	RoleUser  = "USER"  // Regular user
+	RoleStaff = "STAFF" // Staff member
+	RoleAdmin = "ADMIN" // Administrator
 )
 
 // Ticket status constants
@@ -113,4 +121,28 @@ type Parameter struct {
 	LatestTicketPurchaseTime    int    `gorm:"not null" json:"latest_ticket_purchase_time"`
 	TicketCancellationTime      int    `gorm:"not null" json:"ticket_cancellation_time"`
 	lock                        string `gorm:"type:char(1);unique;not null;default:'X';check:lock='X'"`
+}
+
+type User struct {
+	ID        uint           `gorm:"primarykey" json:"id"`
+	Username  string         `gorm:"uniqueIndex;not null" json:"username"`
+	Password  string         `gorm:"not null" json:"-"`
+	Email     string         `gorm:"uniqueIndex;not null" json:"email"`
+	Role      string         `gorm:"not null;default:'user'" json:"role"`
+	CreatedAt time.Time      `json:"created_at"`
+	UpdatedAt time.Time      `json:"updated_at"`
+	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
+}
+
+func (u *User) HashPassword() error {
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(u.Password), bcrypt.DefaultCost)
+	if err != nil {
+		return err
+	}
+	u.Password = string(hashedPassword)
+	return nil
+}
+
+func (u *User) CheckPassword(password string) error {
+	return bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(password))
 }

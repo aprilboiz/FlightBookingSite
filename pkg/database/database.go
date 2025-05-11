@@ -106,7 +106,7 @@ func migrateDatabase(db *gorm.DB) error {
 		&models.IntermediateStop{},
 		&models.Ticket{},
 		&models.Parameter{},
-		//&models.FlightTicketDetails{},
+		&models.User{},
 	)
 }
 

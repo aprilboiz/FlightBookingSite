@@ -40,3 +40,8 @@ type TicketHandler interface {
 	GetTicketStatuses(c *gin.Context)
 	GetBookingTypes(c *gin.Context)
 }
+
+type UserHandler interface {
+	Register(c *gin.Context)
+	Login(c *gin.Context)
+}

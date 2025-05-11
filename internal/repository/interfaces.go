@@ -63,3 +63,14 @@ type TicketRepository interface {
 	GetDB() *gorm.DB
 	GetTicketsByFlightID(flightID uint) ([]*models.Ticket, error)
 }
+
+// UserRepository defines the interface for user-related database operations
+type UserRepository interface {
+	Create(user *models.User) error
+	GetByUsername(username string) (*models.User, error)
+	GetByEmail(email string) (*models.User, error)
+	GetByID(id uint) (*models.User, error)
+	Update(user *models.User) error
+	Delete(id uint) error
+	GetDB() *gorm.DB
+}

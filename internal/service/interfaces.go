@@ -46,3 +46,8 @@ type TicketService interface {
 	GetTicketStatuses() []string
 	GetBookingTypes() []string
 }
+
+type UserService interface {
+	Register(req dto.RegisterRequest) (*dto.AuthResponse, error)
+	Login(req dto.LoginRequest) (*dto.AuthResponse, error)
+}

@@ -55,6 +55,7 @@ func main() {
 	airportRepo := repository.NewAirportRepository(db)
 	planeRepo := repository.NewPlaneRepository(db)
 	ticketRepo := repository.NewTicketRepository(db)
+	userRepo := repository.NewUserRepository(db)
 
 	// Services
 	paramService := service.NewParamService(paramRepo)
@@ -62,6 +63,7 @@ func main() {
 	airportService := service.NewAirportService(airportRepo)
 	planeService := service.NewPlaneService(planeRepo)
 	ticketService := service.NewTicketService(ticketRepo, flightRepo, planeRepo, paramRepo)
+	userService := service.NewUserService(userRepo)
 
 	// Handlers
 	paramHandler := handlers.NewParameterHandler(paramService)
@@ -69,6 +71,7 @@ func main() {
 	airportHandler := handlers.NewAirportHandler(airportService)
 	planeHandler := handlers.NewPlaneHandler(planeService)
 	ticketHandler := handlers.NewTicketHandler(ticketService)
+	userHandler := handlers.NewUserHandler(userService, log)
 
 	h := api.Handlers{
 		ParameterHandler: paramHandler,
@@ -76,6 +79,7 @@ func main() {
 		PlaneHandler:     planeHandler,
 		FlightHandler:    flightHandler,
 		TicketHandler:    ticketHandler,
+		UserHandler:      userHandler,
 		Logger:           log,
 	}
 
@@ -86,13 +90,13 @@ func main() {
 	router.Use(cors.New(cors.Config{
 		AllowOrigins:     []string{"http://localhost:5173"},
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-		AllowHeaders:     []string{"Origin", "Content-Type", "Accept"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization"},
 		ExposeHeaders:    []string{"Content-Length"},
 		AllowCredentials: true,
 		MaxAge:           12 * time.Hour,
 	}))
 
-	// Setup routes
+	// Setup other routes
 	api.SetupRoutes(router, h)
 
 	// Start server
