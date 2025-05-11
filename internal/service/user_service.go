@@ -37,7 +37,7 @@ func (s *userService) Register(req dto.RegisterRequest) (*dto.AuthResponse, erro
 		Username: req.Username,
 		Password: req.Password,
 		Email:    req.Email,
-		Role:     models.RoleUser, // Default role
+		Role:     models.RoleStaff, // Default role
 	}
 
 	if err := user.HashPassword(); err != nil {

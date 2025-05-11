@@ -9,9 +9,9 @@ import (
 
 // User role constants
 const (
-	RoleUser  = "USER"  // Regular user
-	RoleStaff = "STAFF" // Staff member
-	RoleAdmin = "ADMIN" // Administrator
+	RoleDirector = "DIRECTOR" // Director
+	RoleStaff    = "STAFF"    // Staff member
+	RoleAdmin    = "ADMIN"    // Administrator
 )
 
 // Ticket status constants

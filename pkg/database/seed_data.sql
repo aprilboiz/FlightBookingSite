@@ -82,3 +82,28 @@ DO $$
 -- Inserting data into the Configuration table
 INSERT INTO parameters (number_of_airports, min_flight_duration, max_intermediate_stops, min_intermediate_stop_duration, max_intermediate_stop_duration, max_ticket_classes, latest_ticket_purchase_time, ticket_cancellation_time, created_at, updated_at) VALUES
     (10, 30, 2, 10, 20, 2, 1, 0, NOW(), NOW());
+
+
+-- Insert admin user
+INSERT INTO users (email, username, password, role, created_at, updated_at)
+VALUES (
+    'admin@example.com',
+    'admin',
+    '$2a$10$DEpzULpFAvtanyctXdGrFOz1NfETI1LlJoP/Y.Zo0gzOFnIJWhFRe', -- password: admin123
+    'ADMIN',
+    NOW(),
+    NOW()
+);
+
+-- Insert staff users
+INSERT INTO users (email, username, password, role, created_at, updated_at)
+VALUES 
+    ('staff1@example.com', 'staff1', '$2a$10$DEpzULpFAvtanyctXdGrFOz1NfETI1LlJoP/Y.Zo0gzOFnIJWhFRe', 'STAFF', NOW(), NOW()),
+    ('staff2@example.com', 'staff2', '$2a$10$DEpzULpFAvtanyctXdGrFOz1NfETI1LlJoP/Y.Zo0gzOFnIJWhFRe', 'STAFF', NOW(), NOW()),
+    ('staff3@example.com', 'staff3', '$2a$10$DEpzULpFAvtanyctXdGrFOz1NfETI1LlJoP/Y.Zo0gzOFnIJWhFRe', 'STAFF', NOW(), NOW());
+
+-- Insert director users
+INSERT INTO users (email, username, password, role, created_at, updated_at)
+VALUES 
+    ('director1@example.com', 'director1', '$2a$10$DEpzULpFAvtanyctXdGrFOz1NfETI1LlJoP/Y.Zo0gzOFnIJWhFRe', 'DIRECTOR', NOW(), NOW()),
+    ('director2@example.com', 'director2', '$2a$10$DEpzULpFAvtanyctXdGrFOz1NfETI1LlJoP/Y.Zo0gzOFnIJWhFRe', 'DIRECTOR', NOW(), NOW());  
