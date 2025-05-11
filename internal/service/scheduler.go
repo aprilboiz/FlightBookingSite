@@ -1,22 +1,25 @@
 package service
 
 import (
-	"log"
 	"time"
 
+	"github.com/aprilboiz/flight-management/internal/exceptions"
 	"github.com/aprilboiz/flight-management/internal/models"
 	"github.com/aprilboiz/flight-management/internal/repository"
+	"go.uber.org/zap"
 )
 
 type SchedulerService struct {
 	ticketRepo repository.TicketRepository
 	flightRepo repository.FlightRepository
+	logger     *zap.Logger
 }
 
 func NewSchedulerService(ticketRepo repository.TicketRepository, flightRepo repository.FlightRepository) *SchedulerService {
 	return &SchedulerService{
 		ticketRepo: ticketRepo,
 		flightRepo: flightRepo,
+		logger:     zap.L(),
 	}
 }
 
@@ -26,7 +29,7 @@ func (s *SchedulerService) StartPlaceOrderCancellationJob() {
 	go func() {
 		for range ticker.C {
 			if err := s.cancelExpiredPlaceOrders(); err != nil {
-				log.Printf("Error cancelling expired place orders: %v", err)
+				s.logger.Error("Error cancelling expired place orders", zap.Error(err))
 			}
 		}
 	}()
@@ -46,17 +49,22 @@ func (s *SchedulerService) cancelExpiredPlaceOrders() error {
 		Find(&tickets)
 
 	if result.Error != nil {
-		return result.Error
+		return exceptions.Internal("failed to get place orders", result.Error)
 	}
 
 	// Cancel each place order
 	for _, ticket := range tickets {
 		ticket.TicketStatus = models.TicketStatusExpired
 		if _, err := s.ticketRepo.Update(&ticket); err != nil {
-			log.Printf("Error cancelling place order %d: %v", ticket.ID, err)
+			s.logger.Error("Error cancelling place order",
+				zap.Uint("ticketID", ticket.ID),
+				zap.Uint("flightID", ticket.FlightID),
+				zap.Error(err))
 			continue
 		}
-		log.Printf("Expired place order %d for flight %d", ticket.ID, ticket.FlightID)
+		s.logger.Debug("Expired place order",
+			zap.Uint("ticketID", ticket.ID),
+			zap.Uint("flightID", ticket.FlightID))
 	}
 
 	return nil

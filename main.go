@@ -4,13 +4,13 @@ import (
 	"time"
 
 	"github.com/aprilboiz/flight-management/pkg/config"
+	initpkg "github.com/aprilboiz/flight-management/pkg/init"
 
 	"github.com/aprilboiz/flight-management/internal/api"
 	"github.com/aprilboiz/flight-management/internal/api/handlers"
 	"github.com/aprilboiz/flight-management/internal/repository"
 	"github.com/aprilboiz/flight-management/internal/service"
 	"github.com/aprilboiz/flight-management/pkg/database"
-	"github.com/aprilboiz/flight-management/pkg/logger"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -35,8 +35,7 @@ import (
 
 func main() {
 	// Initialize logger
-	logger.Init(config.GetConfig().Environment)
-	log := logger.Get()
+	log := initpkg.InitLogger(config.GetConfig().Environment)
 	defer func(log *zap.Logger) {
 		err := log.Sync()
 		if err != nil {
@@ -44,7 +43,7 @@ func main() {
 		}
 	}(log)
 
-	log.Info("Setting up the application")
+	log.Info("Starting application")
 
 	// Initialize database connection
 	db := database.GetDatabase()
@@ -64,6 +63,12 @@ func main() {
 	planeService := service.NewPlaneService(planeRepo)
 	ticketService := service.NewTicketService(ticketRepo, flightRepo, planeRepo, paramRepo)
 	userService := service.NewUserService(userRepo)
+
+	// Initialize scheduler service
+	schedulerService := service.NewSchedulerService(ticketRepo, flightRepo)
+
+	// Start the place order cancellation job
+	schedulerService.StartPlaceOrderCancellationJob()
 
 	// Handlers
 	paramHandler := handlers.NewParameterHandler(paramService)

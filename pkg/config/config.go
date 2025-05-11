@@ -2,10 +2,10 @@ package config
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"sync"
 
+	"go.uber.org/zap"
 	"gopkg.in/yaml.v3"
 )
 
@@ -60,22 +60,28 @@ const (
 // It's intended to be called only once by sync.Once.
 func loadConfig() {
 	filePath := DefaultConfigPath // Use the constant or get from env/flag
+	log := zap.L()
 
 	yamlFile, err := os.ReadFile(filePath)
 	if err != nil {
-		// Use Fatalf for critical config loading exceptions - app likely can't run.
-		log.Fatalf("CRITICAL: Error reading config file '%s': %v", filePath, err)
+		// Use Fatal for critical config loading exceptions - app likely can't run.
+		log.Fatal("Failed to read config file",
+			zap.String("path", filePath),
+			zap.Error(err))
 	}
 
 	var loadedConfig Config // Temporary variable to unmarshal into
 	err = yaml.Unmarshal(yamlFile, &loadedConfig)
 	if err != nil {
-		log.Fatalf("CRITICAL: Error unmarshalling config YAML from '%s': %v", filePath, err)
+		log.Fatal("Failed to unmarshal config YAML",
+			zap.String("path", filePath),
+			zap.Error(err))
 	}
 
 	// Assign to the package-level variable *after* successful loading
 	cfg = &loadedConfig
-	log.Println("Configuration loaded successfully from", filePath)
+	log.Info("Configuration loaded successfully",
+		zap.String("path", filePath))
 }
 
 // GetConfig returns the singleton instance of the application configuration.
@@ -86,7 +92,7 @@ func GetConfig() *Config {
 	once.Do(loadConfig)
 
 	if cfg == nil {
-		log.Panicln("CRITICAL: Configuration accessed before successful loading or loading failed without panic.")
+		zap.L().Panic("Configuration accessed before successful loading or loading failed without panic")
 	}
 	return cfg
 }

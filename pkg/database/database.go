@@ -3,7 +3,6 @@ package database
 import (
 	"errors"
 	"fmt"
-	"log"
 	"os"
 	"time"
 
@@ -24,7 +23,7 @@ func GetDatabase() *gorm.DB {
 	}
 	db, err := initialize(zap.L())
 	if err != nil {
-		log.Fatal("Failed to connect to database", zap.Error(err))
+		zap.L().Fatal("Failed to connect to database", zap.Error(err))
 	}
 	return db
 }
@@ -37,7 +36,7 @@ func initialize(log *zap.Logger) (*gorm.DB, error) {
 		zap.NewStdLog(log),
 		logger.Config{
 			SlowThreshold:             time.Second,
-			LogLevel:                  logger.Info,
+			LogLevel:                  logger.Silent,
 			IgnoreRecordNotFoundError: true,
 			Colorful:                  false,
 		},
@@ -50,7 +49,7 @@ func initialize(log *zap.Logger) (*gorm.DB, error) {
 		return nil, err
 	}
 
-	log.Info("Connected to database", zap.String("dsn", config.GetDatabaseConnectionString()))
+	log.Debug("Connected to database", zap.String("dsn", config.GetDatabaseConnectionString()))
 
 	if cfg.Environment == config.EnvironmentDevelopment {
 		log.Warn("Dropping all tables (Development only!)")
@@ -59,7 +58,7 @@ func initialize(log *zap.Logger) (*gorm.DB, error) {
 		}
 	}
 
-	log.Info("Migrating database schema")
+	log.Debug("Migrating database schema")
 	if err := migrateDatabase(db); err != nil {
 		log.Error("Failed to migrate database schema", zap.Error(err))
 		return nil, err
