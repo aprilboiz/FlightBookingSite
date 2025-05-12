@@ -58,7 +58,7 @@ type TicketRepository interface {
 	GetActiveTicketsByFlightID(flightID uint) ([]*models.Ticket, error)
 	Create(ticket *models.Ticket) (*models.Ticket, error)
 	Update(ticket *models.Ticket) (*models.Ticket, error)
-	UpdateTicketStatus(ticketID uint, status string) error
+	UpdateTicketStatus(ticketID uint, status models.TicketStatus) error
 	Delete(id uint) error
 	GetDB() *gorm.DB
 	GetTicketsByFlightID(flightID uint) ([]*models.Ticket, error)

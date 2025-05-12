@@ -5,6 +5,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/aprilboiz/flight-management/internal/models"
 	"github.com/golang-jwt/jwt/v5"
 )
 
@@ -14,13 +15,13 @@ var (
 )
 
 type Claims struct {
-	UserID   uint   `json:"user_id"`
-	Username string `json:"username"`
-	Role     string `json:"role"`
+	UserID   uint        `json:"user_id"`
+	Username string      `json:"username"`
+	Role     models.Role `json:"role"`
 	jwt.RegisteredClaims
 }
 
-func GenerateToken(userID uint, username, role string) (string, error) {
+func GenerateToken(userID uint, username string, role models.Role) (string, error) {
 	claims := Claims{
 		UserID:   userID,
 		Username: username,

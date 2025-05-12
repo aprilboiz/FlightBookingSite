@@ -40,11 +40,11 @@ type TicketService interface {
 	Create(ticket *dto.TicketRequest) (*dto.TicketResponse, error)
 	GetAllTickets() ([]*dto.TicketResponse, error)
 	GetTicketByID(id uint) (*dto.TicketResponse, error)
-	UpdateTicketStatus(ticketId uint, newStatus string) (*dto.TicketResponse, error)
+	UpdateTicketStatus(ticketId uint, newStatus models.TicketStatus) (*dto.TicketResponse, error)
 	DeleteTicket(id uint) error
 	CancelPlaceOrders(flightCode string) error
-	GetTicketStatuses() []string
-	GetBookingTypes() []string
+	GetTicketStatuses() []models.TicketStatus
+	GetBookingTypes() []models.BookingType
 }
 
 type UserService interface {

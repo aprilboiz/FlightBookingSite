@@ -75,7 +75,7 @@ func (t ticketRepository) GetActiveTicketsByFlightID(flightID uint) ([]*models.T
 	return tickets, nil
 }
 
-func (t ticketRepository) UpdateTicketStatus(ticketID uint, status string) error {
+func (t ticketRepository) UpdateTicketStatus(ticketID uint, status models.TicketStatus) error {
 	result := t.db.Model(&models.Ticket{}).Where("id = ?", ticketID).Update("ticket_status", status)
 	if result.Error != nil {
 		return exceptions.Internal("failed to update ticket status", result.Error)

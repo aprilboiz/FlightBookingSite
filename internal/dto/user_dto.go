@@ -1,12 +1,16 @@
 package dto
 
+import (
+	"github.com/aprilboiz/flight-management/internal/models"
+)
+
 type UserResponse struct {
-	ID        uint   `json:"id"`
-	Username  string `json:"username"`
-	Email     string `json:"email"`
-	Role      string `json:"role"`
-	CreatedAt string `json:"created_at"`
-	UpdatedAt string `json:"updated_at"`
+	ID        uint        `json:"id"`
+	Username  string      `json:"username"`
+	Email     string      `json:"email"`
+	Role      models.Role `json:"role"`
+	CreatedAt string      `json:"created_at"`
+	UpdatedAt string      `json:"updated_at"`
 }
 
 type RegisterRequest struct {

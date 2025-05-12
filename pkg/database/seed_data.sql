@@ -102,8 +102,8 @@ VALUES
     ('staff2@example.com', 'staff2', '$2a$10$DEpzULpFAvtanyctXdGrFOz1NfETI1LlJoP/Y.Zo0gzOFnIJWhFRe', 'STAFF', NOW(), NOW()),
     ('staff3@example.com', 'staff3', '$2a$10$DEpzULpFAvtanyctXdGrFOz1NfETI1LlJoP/Y.Zo0gzOFnIJWhFRe', 'STAFF', NOW(), NOW());
 
--- Insert director users
+-- Insert super admin users
 INSERT INTO users (email, username, password, role, created_at, updated_at)
 VALUES 
-    ('director1@example.com', 'director1', '$2a$10$DEpzULpFAvtanyctXdGrFOz1NfETI1LlJoP/Y.Zo0gzOFnIJWhFRe', 'DIRECTOR', NOW(), NOW()),
-    ('director2@example.com', 'director2', '$2a$10$DEpzULpFAvtanyctXdGrFOz1NfETI1LlJoP/Y.Zo0gzOFnIJWhFRe', 'DIRECTOR', NOW(), NOW());  
+    ('super@example.com', 'super', '$2a$10$DEpzULpFAvtanyctXdGrFOz1NfETI1LlJoP/Y.Zo0gzOFnIJWhFRe', 'SUPER_ADMIN', NOW(), NOW()),
+    ('super2@example.com', 'super2', '$2a$10$DEpzULpFAvtanyctXdGrFOz1NfETI1LlJoP/Y.Zo0gzOFnIJWhFRe', 'SUPER_ADMIN', NOW(), NOW());

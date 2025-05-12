@@ -220,7 +220,7 @@ func (t *ticketService) CancelPlaceOrders(flightCode string) error {
 	return nil
 }
 
-func (t *ticketService) UpdateTicketStatus(ticketID uint, newStatus string) (*dto.TicketResponse, error) {
+func (t *ticketService) UpdateTicketStatus(ticketID uint, newStatus models.TicketStatus) (*dto.TicketResponse, error) {
 	// Get the ticket
 	ticket, err := t.ticketRepo.GetByID(ticketID)
 	if err != nil {
@@ -299,8 +299,8 @@ func (t *ticketService) DeleteTicket(id uint) error {
 }
 
 // GetTicketStatuses returns all available ticket statuses
-func (t *ticketService) GetTicketStatuses() []string {
-	return []string{
+func (t *ticketService) GetTicketStatuses() []models.TicketStatus {
+	return []models.TicketStatus{
 		models.TicketStatusActive,
 		models.TicketStatusCancelled,
 		models.TicketStatusUsed,
@@ -310,8 +310,8 @@ func (t *ticketService) GetTicketStatuses() []string {
 }
 
 // GetBookingTypes returns all available booking types
-func (t *ticketService) GetBookingTypes() []string {
-	return []string{
+func (t *ticketService) GetBookingTypes() []models.BookingType {
+	return []models.BookingType{
 		models.BookingTypeTicket,
 		models.BookingTypePlaceOrder,
 	}

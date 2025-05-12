@@ -6,6 +6,7 @@ import (
 	"slices"
 
 	"github.com/aprilboiz/flight-management/internal/exceptions"
+	"github.com/aprilboiz/flight-management/internal/models"
 	"github.com/aprilboiz/flight-management/pkg/auth"
 	"github.com/gin-gonic/gin"
 )
@@ -44,7 +45,7 @@ func AuthMiddleware() gin.HandlerFunc {
 	}
 }
 
-func RoleMiddleware(roles ...string) gin.HandlerFunc {
+func RoleMiddleware(roles ...models.Role) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		userRole, exists := c.Get("role")
 		if !exists {
@@ -53,7 +54,7 @@ func RoleMiddleware(roles ...string) gin.HandlerFunc {
 			return
 		}
 
-		hasRole := slices.Contains(roles, userRole.(string))
+		hasRole := slices.Contains(roles, userRole.(models.Role))
 
 		if !hasRole {
 			_ = c.Error(exceptions.NewAppError(exceptions.FORBIDDEN, "Insufficient permissions", nil))

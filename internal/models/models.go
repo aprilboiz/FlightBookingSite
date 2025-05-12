@@ -7,26 +7,32 @@ import (
 	"gorm.io/gorm"
 )
 
+type Role string
+
 // User role constants
 const (
-	RoleDirector = "DIRECTOR" // Director
-	RoleStaff    = "STAFF"    // Staff member
-	RoleAdmin    = "ADMIN"    // Administrator
+	RoleSuperAdmin Role = "SUPER_ADMIN"
+	RoleAdmin      Role = "ADMIN"
+	RoleStaff      Role = "STAFF"
 )
 
 // Ticket status constants
+type TicketStatus string
+
 const (
-	TicketStatusActive    = "ACTIVE"    // Ticket is active and can be used
-	TicketStatusCancelled = "CANCELLED" // Ticket has been cancelled
-	TicketStatusUsed      = "USED"      // Ticket has been used for the flight
-	TicketStatusExpired   = "EXPIRED"   // Ticket has expired (for place orders)
-	TicketStatusRefunded  = "REFUNDED"  // Ticket has been refunded
+	TicketStatusActive    TicketStatus = "ACTIVE"    // Ticket is active and can be used
+	TicketStatusCancelled TicketStatus = "CANCELLED" // Ticket has been cancelled
+	TicketStatusUsed      TicketStatus = "USED"      // Ticket has been used for the flight
+	TicketStatusExpired   TicketStatus = "EXPIRED"   // Ticket has expired (for place orders)
+	TicketStatusRefunded  TicketStatus = "REFUNDED"  // Ticket has been refunded
 )
 
 // Booking type constants
+type BookingType string
+
 const (
-	BookingTypeTicket     = "TICKET"      // Regular confirmed ticket
-	BookingTypePlaceOrder = "PLACE_ORDER" // Temporary place order
+	BookingTypeTicket     BookingType = "TICKET"      // Regular confirmed ticket
+	BookingTypePlaceOrder BookingType = "PLACE_ORDER" // Temporary place order
 )
 
 type Plane struct {
@@ -95,16 +101,16 @@ type IntermediateStop struct {
 }
 
 type Ticket struct {
-	ID           uint    `gorm:"primaryKey"`
-	FlightID     uint    `gorm:"primaryKey"`
-	SeatID       uint    `gorm:"primaryKey"`
-	Price        float64 `gorm:"not null"`
-	FullName     string  `gorm:"not null"`
-	IDCard       string  `gorm:"not null"`
-	PhoneNumber  string  `gorm:"not null"`
-	Email        string  `gorm:"not null"`
-	TicketStatus string  `gorm:"not null;default:'ACTIVE'"` // Status of the ticket
-	BookingType  string  `gorm:"not null;default:'TICKET'"` // Type of booking
+	ID           uint         `gorm:"primaryKey"`
+	FlightID     uint         `gorm:"primaryKey"`
+	SeatID       uint         `gorm:"primaryKey"`
+	Price        float64      `gorm:"not null"`
+	FullName     string       `gorm:"not null"`
+	IDCard       string       `gorm:"not null"`
+	PhoneNumber  string       `gorm:"not null"`
+	Email        string       `gorm:"not null"`
+	TicketStatus TicketStatus `gorm:"not null;default:'ACTIVE'"` // Status of the ticket
+	BookingType  BookingType  `gorm:"not null;default:'TICKET'"` // Type of booking
 
 	Flight Flight `gorm:"foreignKey:FlightID;references:ID"`
 	Seat   Seat   `gorm:"foreignKey:SeatID;references:ID"`
@@ -128,7 +134,7 @@ type User struct {
 	Username  string         `gorm:"uniqueIndex;not null" json:"username"`
 	Password  string         `gorm:"not null" json:"-"`
 	Email     string         `gorm:"uniqueIndex;not null" json:"email"`
-	Role      string         `gorm:"not null;default:'user'" json:"role"`
+	Role      Role           `gorm:"not null;default:'STAFF'" json:"role"`
 	CreatedAt time.Time      `json:"created_at"`
 	UpdatedAt time.Time      `json:"updated_at"`
 	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
