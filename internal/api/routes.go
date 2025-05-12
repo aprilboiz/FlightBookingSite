@@ -44,82 +44,70 @@ func SetupRoutes(router *gin.Engine, h Handlers) {
 		protected := v1.Group("")
 		protected.Use(middleware.AuthMiddleware())
 		{
+			// Flight routes
 			flightRoutes := protected.Group("/flights")
 			{
 				flightRoutes.GET("", h.FlightHandler.GetAllFlights)
 				flightRoutes.GET("/list", h.FlightHandler.GetAllFlightsInList)
 				flightRoutes.GET("/:code", h.FlightHandler.GetFlightByCode)
+
+				// Higher level roles
+				adminFlightOps := flightRoutes.Group("")
+				adminFlightOps.Use(middleware.RoleMiddleware(models.RoleAdmin, models.RoleSuperAdmin))
+				{
+					adminFlightOps.POST("", middleware.ValidateRequest(&dto.FlightRequest{}), h.FlightHandler.CreateFlight)
+					adminFlightOps.PUT("/:code", middleware.ValidateRequest(&dto.FlightRequest{}), h.FlightHandler.UpdateFlight)
+					adminFlightOps.DELETE("/:code", h.FlightHandler.DeleteFlightByCode)
+				}
 			}
 
+			// Plane routes
 			planeRoutes := protected.Group("/planes")
 			{
 				planeRoutes.GET("", h.PlaneHandler.GetAllPlanes)
 				planeRoutes.GET("/:code", h.PlaneHandler.GetPlaneByCode)
 			}
 
+			// Airport routes
 			airportRoutes := protected.Group("/airports")
 			{
 				airportRoutes.GET("", h.AirportHandler.GetAllAirports)
 				airportRoutes.GET("/:code", h.AirportHandler.GetAirportByCode)
 			}
 
-			// Admin only routes
+			// Parameter routes
 			adminRoutes := protected.Group("")
-			adminRoutes.Use(middleware.RoleMiddleware("ADMIN"))
+			adminRoutes.Use(middleware.RoleMiddleware(models.RoleSuperAdmin))
 			{
 				paramHandler := adminRoutes.Group("/params")
 				{
 					paramHandler.GET("", h.ParameterHandler.GetAllParameters)
 					paramHandler.PUT("", middleware.ValidateRequest(&models.Parameter{}), h.ParameterHandler.UpdateParameters)
 				}
+			}
 
-				adminFlightRoutes := adminRoutes.Group("/flights")
+			// Report routes
+			reportRoutes := protected.Group("")
+			reportRoutes.Use(middleware.RoleMiddleware(models.RoleAdmin, models.RoleSuperAdmin))
+			{
+				reportHandler := reportRoutes.Group("/reports")
 				{
-					adminFlightRoutes.POST("", middleware.ValidateRequest(&dto.FlightRequest{}), h.FlightHandler.CreateFlight)
-					adminFlightRoutes.PUT("/:code", middleware.ValidateRequest(&dto.FlightRequest{}), h.FlightHandler.UpdateFlight)
-					adminFlightRoutes.DELETE("/:code", h.FlightHandler.DeleteFlightByCode)
-				}
-
-				reportRoutes := adminRoutes.Group("/reports")
-				{
-					reportRoutes.GET("/revenue/monthly", h.FlightHandler.GetMonthlyRevenueReport)
-					reportRoutes.GET("/revenue/yearly", h.FlightHandler.GetYearlyRevenueReport)
-					reportRoutes.GET("/revenue", h.FlightHandler.GetRevenueReport)
+					reportHandler.GET("/revenue/monthly", h.FlightHandler.GetMonthlyRevenueReport)
+					reportHandler.GET("/revenue/yearly", h.FlightHandler.GetYearlyRevenueReport)
+					reportHandler.GET("/revenue", h.FlightHandler.GetRevenueReport)
 				}
 			}
 
-			// Director routes
-			directorRoutes := protected.Group("")
-			directorRoutes.Use(middleware.RoleMiddleware("DIRECTOR"))
+			// Ticket operations
+			ticketRoutes := protected.Group("/tickets")
 			{
-				directorFlightRoutes := directorRoutes.Group("/flights")
-				{
-					directorFlightRoutes.POST("", middleware.ValidateRequest(&dto.FlightRequest{}), h.FlightHandler.CreateFlight)
-				}
-
-				directorReportRoutes := directorRoutes.Group("/reports")
-				{
-					directorReportRoutes.GET("/revenue/monthly", h.FlightHandler.GetMonthlyRevenueReport)
-					directorReportRoutes.GET("/revenue/yearly", h.FlightHandler.GetYearlyRevenueReport)
-					directorReportRoutes.GET("/revenue", h.FlightHandler.GetRevenueReport)
-				}
-			}
-
-			// Staff routes
-			staffRoutes := protected.Group("")
-			staffRoutes.Use(middleware.RoleMiddleware("STAFF"))
-			{
-				// Ticket operations
-				ticketRoutes := staffRoutes.Group("/tickets")
-				{
-					ticketRoutes.GET("", h.TicketHandler.GetAllTickets)
-					ticketRoutes.GET("/:id", h.TicketHandler.GetTicketByID)
-					ticketRoutes.POST("", middleware.ValidateRequest(&dto.TicketRequest{}), h.TicketHandler.CreateTicket)
-					ticketRoutes.PUT("/:id/status", middleware.ValidateRequest(&dto.TicketStatusUpdateRequest{}), h.TicketHandler.UpdateTicketStatus)
-					ticketRoutes.DELETE("/:id", h.TicketHandler.DeleteTicket)
-					ticketRoutes.GET("/statuses", h.TicketHandler.GetTicketStatuses)
-					ticketRoutes.GET("/booking-types", h.TicketHandler.GetBookingTypes)
-				}
+				ticketRoutes.GET("", h.TicketHandler.GetAllTickets)
+				ticketRoutes.GET("/:id", h.TicketHandler.GetTicketByID)
+				ticketRoutes.POST("", middleware.ValidateRequest(&dto.TicketRequest{}), h.TicketHandler.CreateTicket)
+				ticketRoutes.PUT("/:id/status", middleware.ValidateRequest(&dto.TicketStatusUpdateRequest{}), h.TicketHandler.UpdateTicketStatus)
+				ticketRoutes.DELETE("/:id", h.TicketHandler.DeleteTicket)
+				ticketRoutes.GET("/statuses", h.TicketHandler.GetTicketStatuses)
+				ticketRoutes.GET("/booking-types", h.TicketHandler.GetBookingTypes)
 			}
 		}
 	}
