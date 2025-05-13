@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"time"
 
-	appConf "github.com/aprilboiz/flight-management/pkg/config"
+	"github.com/aprilboiz/flight-management/pkg/config"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
@@ -13,15 +13,9 @@ import (
 // Global logger instance
 var log *zap.Logger
 
-// Init initializes the logger with proper configuration
-func Init(environment string) {
+// InitLogger initializes the logger with proper configuration
+func InitLogger(environment string) *zap.Logger {
 	var zapConfig zap.Config
-
-	// Get the application config
-	appConfig := appConf.GetConfig()
-	if appConfig == nil {
-		panic("Failed to initialize logger: application config is nil")
-	}
 
 	// Configure based on environment
 	if environment == "production" {
@@ -40,13 +34,13 @@ func Init(environment string) {
 
 	// Set log level from config
 	level := zapcore.InfoLevel
-	if err := level.UnmarshalText([]byte(appConfig.Logging.Level)); err != nil {
+	if err := level.UnmarshalText([]byte(config.GetConfig().Logging.Level)); err != nil {
 		level = zapcore.InfoLevel
 	}
 	zapConfig.Level = zap.NewAtomicLevelAt(level)
 
 	// Ensure the log directory exists
-	logPath := appConfig.Logging.OutputPath
+	logPath := config.GetConfig().Logging.OutputPath
 	logDir := filepath.Dir(logPath)
 	if err := os.MkdirAll(logDir, 0755); err != nil {
 		panic("Failed to create log directory: " + err.Error())
@@ -60,14 +54,14 @@ func Init(environment string) {
 	zapConfig.EncoderConfig.EncodeCaller = zapcore.ShortCallerEncoder
 
 	// Build the logger
-	var err error
-	log, err = zapConfig.Build(zap.AddCallerSkip(1))
+	log, err := zapConfig.Build(zap.AddCallerSkip(1))
 	if err != nil {
 		panic("Failed to initialize logger: " + err.Error())
 	}
 
-	// Replace globals only after successful build
+	// Replace globals
 	zap.ReplaceGlobals(log)
+	return log
 }
 
 // Get returns the global logger instance
@@ -169,6 +163,6 @@ func WithTime(key string, value time.Time) *zap.Logger {
 }
 
 // WithAny adds any field to the logger
-func WithAny(key string, value interface{}) *zap.Logger {
+func WithAny(key string, value any) *zap.Logger {
 	return log.With(zap.Any(key, value))
 }

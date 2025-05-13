@@ -49,7 +49,7 @@ func (s *SchedulerService) cancelExpiredPlaceOrders() error {
 		Find(&tickets)
 
 	if result.Error != nil {
-		return exceptions.Internal("failed to get place orders", result.Error)
+		return exceptions.InternalError("failed to get place orders", result.Error)
 	}
 
 	// Cancel each place order

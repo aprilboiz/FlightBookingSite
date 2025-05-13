@@ -3,32 +3,32 @@ package exceptions
 import "net/http"
 
 const (
-	INTERNAL_ERROR             = "internal_error"
-	NOT_FOUND                  = "not_found"
-	BAD_REQUEST                = "bad_request"
-	UNAUTHORIZED               = "unauthorized"
-	FORBIDDEN                  = "forbidden"
-	CONFLICT                   = "conflict"
-	UNPROCESSABLE_ENTITY       = "unprocessable_entity"
-	UNSUPPORTED_MEDIA_TYPE     = "unsupported_media_type"
-	TOO_MANY_REQUESTS          = "too_many_requests"
-	SERVICE_UNAVAILABLE        = "service_unavailable"
-	GATEWAY_TIMEOUT            = "gateway_timeout"
-	NOT_IMPLEMENTED            = "not_implemented"
-	HTTP_VERSION_NOT_SUPPORTED = "http_version_not_supported"
-	METHOD_NOT_ALLOWED         = "method_not_allowed"
+	INTERNAL                = "internal_error"
+	NotFound                = "not_found"
+	BadRequest              = "bad_request"
+	UNAUTHORIZED            = "unauthorized"
+	FORBIDDEN               = "forbidden"
+	CONFLICT                = "conflict"
+	UnprocessableEntity     = "unprocessable_entity"
+	UnsupportedMediaType    = "unsupported_media_type"
+	TooManyRequests         = "too_many_requests"
+	ServiceUnavailable      = "service_unavailable"
+	GatewayTimeout          = "gateway_timeout"
+	NotImplemented          = "not_implemented"
+	HttpVersionNotSupported = "http_version_not_supported"
+	MethodNotAllowed        = "method_not_allowed"
 )
 
 var ErrorType = map[string]*ErrorInfo{
-	INTERNAL_ERROR: {
+	INTERNAL: {
 		StatusCode: http.StatusInternalServerError,
 		Title:      http.StatusText(http.StatusInternalServerError),
 	},
-	NOT_FOUND: {
+	NotFound: {
 		StatusCode: http.StatusNotFound,
 		Title:      http.StatusText(http.StatusNotFound),
 	},
-	BAD_REQUEST: {
+	BadRequest: {
 		StatusCode: http.StatusBadRequest,
 		Title:      http.StatusText(http.StatusBadRequest),
 	},
@@ -44,35 +44,35 @@ var ErrorType = map[string]*ErrorInfo{
 		StatusCode: http.StatusConflict,
 		Title:      http.StatusText(http.StatusConflict),
 	},
-	UNPROCESSABLE_ENTITY: {
+	UnprocessableEntity: {
 		StatusCode: http.StatusUnprocessableEntity,
 		Title:      http.StatusText(http.StatusUnprocessableEntity),
 	},
-	UNSUPPORTED_MEDIA_TYPE: {
+	UnsupportedMediaType: {
 		StatusCode: http.StatusUnsupportedMediaType,
 		Title:      http.StatusText(http.StatusUnsupportedMediaType),
 	},
-	TOO_MANY_REQUESTS: {
+	TooManyRequests: {
 		StatusCode: http.StatusTooManyRequests,
 		Title:      http.StatusText(http.StatusTooManyRequests),
 	},
-	SERVICE_UNAVAILABLE: {
+	ServiceUnavailable: {
 		StatusCode: http.StatusServiceUnavailable,
 		Title:      http.StatusText(http.StatusServiceUnavailable),
 	},
-	GATEWAY_TIMEOUT: {
+	GatewayTimeout: {
 		StatusCode: http.StatusGatewayTimeout,
 		Title:      http.StatusText(http.StatusGatewayTimeout),
 	},
-	NOT_IMPLEMENTED: {
+	NotImplemented: {
 		StatusCode: http.StatusNotImplemented,
 		Title:      http.StatusText(http.StatusNotImplemented),
 	},
-	HTTP_VERSION_NOT_SUPPORTED: {
+	HttpVersionNotSupported: {
 		StatusCode: http.StatusHTTPVersionNotSupported,
 		Title:      http.StatusText(http.StatusHTTPVersionNotSupported),
 	},
-	METHOD_NOT_ALLOWED: {
+	MethodNotAllowed: {
 		StatusCode: http.StatusMethodNotAllowed,
 		Title:      http.StatusText(http.StatusMethodNotAllowed),
 	},

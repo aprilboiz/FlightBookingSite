@@ -38,8 +38,8 @@ func NewAppError(errType, message string, details interface{}) *AppError {
 	}
 }
 
-func NotFound(entity string, identifier string) *AppError {
-	errInfo := ResolveErrorType(NOT_FOUND)
+func NotFoundError(entity string, identifier string) *AppError {
+	errInfo := ResolveErrorType(NotFound)
 	return &AppError{
 		Code:       errInfo.Title,
 		Message:    fmt.Sprintf("%s with identifier '%s' not found", entity, identifier),
@@ -47,8 +47,8 @@ func NotFound(entity string, identifier string) *AppError {
 	}
 }
 
-func BadRequest(message string, err error) *AppError {
-	errInfo := ResolveErrorType(BAD_REQUEST)
+func BadRequestError(message string, err error) *AppError {
+	errInfo := ResolveErrorType(BadRequest)
 	return &AppError{
 		Code:       errInfo.Title,
 		Message:    message,
@@ -57,8 +57,8 @@ func BadRequest(message string, err error) *AppError {
 	}
 }
 
-func Internal(message string, err error) *AppError {
-	errInfo := ResolveErrorType(INTERNAL_ERROR)
+func InternalError(message string, err error) *AppError {
+	errInfo := ResolveErrorType(INTERNAL)
 	return &AppError{
 		Code:       errInfo.Title,
 		Message:    message,
@@ -79,7 +79,7 @@ func NewErrorResponse(statusCode int, title, message string, details interface{}
 func ResolveErrorType(errorType string) *ErrorInfo {
 	errorInfo, exists := ErrorType[errorType]
 	if !exists {
-		errorInfo = ErrorType[INTERNAL_ERROR]
+		errorInfo = ErrorType[INTERNAL]
 	}
 	return errorInfo
 }

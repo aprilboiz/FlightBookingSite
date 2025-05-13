@@ -68,7 +68,7 @@ func (t *ticketService) Create(ticket *dto.TicketRequest) (*dto.TicketResponse, 
 
 	// Check if a flight is in the past
 	if flight.DepartureDateTime.Before(time.Now()) {
-		return nil, exceptions.BadRequest("cannot book ticket for a past flight", nil)
+		return nil, exceptions.BadRequestError("cannot book ticket for a past flight", nil)
 	}
 
 	// 2. Validate seat exists and is available
@@ -81,7 +81,7 @@ func (t *ticketService) Create(ticket *dto.TicketRequest) (*dto.TicketResponse, 
 	var existingTicket models.Ticket
 	result := t.ticketRepo.GetDB().Where("flight_id = ? AND seat_id = ?", flight.ID, seat.ID).First(&existingTicket)
 	if result.Error == nil {
-		return nil, exceptions.BadRequest("seat is already booked for this flight", nil)
+		return nil, exceptions.BadRequestError("seat is already booked for this flight", nil)
 	}
 
 	// 3. Calculate ticket price based on seat class
@@ -103,7 +103,7 @@ func (t *ticketService) Create(ticket *dto.TicketRequest) (*dto.TicketResponse, 
 		daysBefore := time.Duration(params.LatestTicketPurchaseTime) * 24 * time.Hour
 		deadline := flight.DepartureDateTime.Add(-daysBefore)
 		if time.Now().After(deadline) {
-			return nil, exceptions.BadRequest(fmt.Sprintf("place orders must be made at least %d days before departure", params.LatestTicketPurchaseTime), nil)
+			return nil, exceptions.BadRequestError(fmt.Sprintf("place orders must be made at least %d days before departure", params.LatestTicketPurchaseTime), nil)
 		}
 	}
 
@@ -149,7 +149,7 @@ func (t *ticketService) ConvertPlaceOrderToTicket(placeOrderID uint) (*dto.Ticke
 
 	// 2. Validate it a place order
 	if placeOrder.BookingType != models.BookingTypePlaceOrder {
-		return nil, exceptions.BadRequest("this is not a place order", nil)
+		return nil, exceptions.BadRequestError("this is not a place order", nil)
 	}
 
 	// 3. Get the flight to check timing
@@ -168,7 +168,7 @@ func (t *ticketService) ConvertPlaceOrderToTicket(placeOrderID uint) (*dto.Ticke
 	daysBefore := time.Duration(params.LatestTicketPurchaseTime) * 24 * time.Hour
 	deadline := flight.DepartureDateTime.Add(-daysBefore)
 	if time.Now().After(deadline) {
-		return nil, exceptions.BadRequest("cannot convert place order to ticket after the deadline", nil)
+		return nil, exceptions.BadRequestError("cannot convert place order to ticket after the deadline", nil)
 	}
 
 	// 6. Update the booking type and status
@@ -247,17 +247,17 @@ func (t *ticketService) UpdateTicketStatus(ticketID uint, newStatus models.Ticke
 
 		// Check if it's past the cancellation deadline
 		if time.Now().After(deadline) {
-			return nil, exceptions.BadRequest(fmt.Sprintf("cannot cancel ticket after %d days before departure", params.TicketCancellationTime), nil)
+			return nil, exceptions.BadRequestError(fmt.Sprintf("cannot cancel ticket after %d days before departure", params.TicketCancellationTime), nil)
 		}
 
 		// Check if the ticket is already cancelled
 		if ticket.TicketStatus == models.TicketStatusCancelled {
-			return nil, exceptions.BadRequest("ticket is already cancelled", nil)
+			return nil, exceptions.BadRequestError("ticket is already cancelled", nil)
 		}
 
 		// Check if the ticket is already used
 		if ticket.TicketStatus == models.TicketStatusUsed {
-			return nil, exceptions.BadRequest("cannot cancel a used ticket", nil)
+			return nil, exceptions.BadRequestError("cannot cancel a used ticket", nil)
 		}
 	}
 

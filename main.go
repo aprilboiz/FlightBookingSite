@@ -4,7 +4,7 @@ import (
 	"time"
 
 	"github.com/aprilboiz/flight-management/pkg/config"
-	initpkg "github.com/aprilboiz/flight-management/pkg/init"
+	"github.com/aprilboiz/flight-management/pkg/logger"
 
 	"github.com/aprilboiz/flight-management/internal/api"
 	"github.com/aprilboiz/flight-management/internal/api/handlers"
@@ -35,7 +35,7 @@ import (
 
 func main() {
 	// Initialize logger
-	log := initpkg.InitLogger(config.GetConfig().Environment)
+	log := logger.InitLogger(config.GetConfig().Environment)
 	defer func(log *zap.Logger) {
 		err := log.Sync()
 		if err != nil {

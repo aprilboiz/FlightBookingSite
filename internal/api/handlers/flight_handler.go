@@ -29,7 +29,7 @@ type flightHandler struct {
 //	@Success		200	{array}		dto.FlightListResponse
 //	@Failure		500	{object}	dto.ErrorResponse
 //	@Router			/api/flights/list [get]
-func (f flightHandler) GetAllFlightsInList(c *gin.Context) {
+func (f *flightHandler) GetAllFlightsInList(c *gin.Context) {
 	flights, err := f.flightService.GetAllFlightsInList()
 	if err != nil {
 		_ = c.Error(err)
@@ -48,7 +48,7 @@ func (f flightHandler) GetAllFlightsInList(c *gin.Context) {
 //	@Success		200	{array}		dto.FlightResponse
 //	@Failure		500	{object}	dto.ErrorResponse
 //	@Router			/api/flights [get]
-func (f flightHandler) GetAllFlights(c *gin.Context) {
+func (f *flightHandler) GetAllFlights(c *gin.Context) {
 	flights, err := f.flightService.GetAllFlights()
 	if err != nil {
 		_ = c.Error(err)
@@ -69,7 +69,7 @@ func (f flightHandler) GetAllFlights(c *gin.Context) {
 //	@Failure		404		{object}	dto.ErrorResponse
 //	@Failure		500		{object}	dto.ErrorResponse
 //	@Router			/api/flights/{code} [get]
-func (f flightHandler) GetFlightByCode(c *gin.Context) {
+func (f *flightHandler) GetFlightByCode(c *gin.Context) {
 	code := c.Param("code")
 	flight, err := f.flightService.GetFlightByCode(code)
 	if err != nil {
@@ -91,15 +91,15 @@ func (f flightHandler) GetFlightByCode(c *gin.Context) {
 //	@Failure		400		{object}	dto.ErrorResponse
 //	@Failure		500		{object}	dto.ErrorResponse
 //	@Router			/api/flights [post]
-func (f flightHandler) CreateFlight(c *gin.Context) {
+func (f *flightHandler) CreateFlight(c *gin.Context) {
 	validatedModel, exists := c.Get("validatedModel")
 	if !exists {
-		_ = c.Error(e.NewAppError(e.INTERNAL_ERROR, "Cannot find validated model in context", nil))
+		_ = c.Error(e.NewAppError(e.INTERNAL, "Cannot find validated model in context", nil))
 		return
 	}
 	flightRequest, ok := validatedModel.(*dto.FlightRequest)
 	if !ok {
-		_ = c.Error(e.NewAppError(e.INTERNAL_ERROR, "Cannot cast validated model to FlightRequest", nil))
+		_ = c.Error(e.NewAppError(e.INTERNAL, "Cannot cast validated model to FlightRequest", nil))
 		return
 	}
 	flightResponse, err := f.flightService.Create(flightRequest)
@@ -124,16 +124,16 @@ func (f flightHandler) CreateFlight(c *gin.Context) {
 //	@Failure		404		{object}	dto.ErrorResponse
 //	@Failure		500		{object}	dto.ErrorResponse
 //	@Router			/api/flights/{code} [put]
-func (f flightHandler) UpdateFlight(c *gin.Context) {
+func (f *flightHandler) UpdateFlight(c *gin.Context) {
 	code := c.Param("code")
 	validatedModel, exists := c.Get("validatedModel")
 	if !exists {
-		_ = c.Error(e.NewAppError(e.INTERNAL_ERROR, "Cannot find validated model in context", nil))
+		_ = c.Error(e.NewAppError(e.INTERNAL, "Cannot find validated model in context", nil))
 		return
 	}
 	flightRequest, ok := validatedModel.(*dto.FlightRequest)
 	if !ok {
-		_ = c.Error(e.NewAppError(e.INTERNAL_ERROR, "Cannot cast validated model to FlightRequest", nil))
+		_ = c.Error(e.NewAppError(e.INTERNAL, "Cannot cast validated model to FlightRequest", nil))
 		return
 	}
 
@@ -157,7 +157,7 @@ func (f flightHandler) UpdateFlight(c *gin.Context) {
 //	@Failure		404		{object}	dto.ErrorResponse
 //	@Failure		500		{object}	dto.ErrorResponse
 //	@Router			/api/flights/{code} [delete]
-func (f flightHandler) DeleteFlightByCode(c *gin.Context) {
+func (f *flightHandler) DeleteFlightByCode(c *gin.Context) {
 	code := c.Param("code")
 	if err := f.flightService.Delete(code); err != nil {
 		_ = c.Error(err)
@@ -179,7 +179,7 @@ func (f flightHandler) DeleteFlightByCode(c *gin.Context) {
 //	@Failure		400		{object}	dto.ErrorResponse
 //	@Failure		500		{object}	dto.ErrorResponse
 //	@Router			/api/reports/revenue [get]
-func (h *flightHandler) GetRevenueReport(c *gin.Context) {
+func (f *flightHandler) GetRevenueReport(c *gin.Context) {
 	// Get year and month from query parameters
 	monthStr := c.Query("month")
 	yearStr := c.Query("year")
@@ -197,7 +197,7 @@ func (h *flightHandler) GetRevenueReport(c *gin.Context) {
 	}
 
 	// Get revenue report
-	report, err := h.flightService.GetMonthlyRevenueReport(year, month)
+	report, err := f.flightService.GetMonthlyRevenueReport(year, month)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -218,7 +218,7 @@ func (h *flightHandler) GetRevenueReport(c *gin.Context) {
 //	@Failure		400		{object}	dto.ErrorResponse
 //	@Failure		500		{object}	dto.ErrorResponse
 //	@Router			/api/reports/revenue/monthly [get]
-func (h *flightHandler) GetMonthlyRevenueReport(c *gin.Context) {
+func (f *flightHandler) GetMonthlyRevenueReport(c *gin.Context) {
 	// Get year and month from query parameters
 	monthStr := c.Query("month")
 
@@ -232,7 +232,7 @@ func (h *flightHandler) GetMonthlyRevenueReport(c *gin.Context) {
 	}
 
 	// Get revenue report
-	report, err := h.flightService.GetMonthlyRevenueReport(year, month)
+	report, err := f.flightService.GetMonthlyRevenueReport(year, month)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -253,7 +253,7 @@ func (h *flightHandler) GetMonthlyRevenueReport(c *gin.Context) {
 //	@Failure		400		{object}	dto.ErrorResponse
 //	@Failure		500		{object}	dto.ErrorResponse
 //	@Router			/api/reports/revenue/yearly [get]
-func (h *flightHandler) GetYearlyRevenueReport(c *gin.Context) {
+func (f *flightHandler) GetYearlyRevenueReport(c *gin.Context) {
 	// Get year from query parameter
 	yearStr := c.Query("year")
 
@@ -264,7 +264,7 @@ func (h *flightHandler) GetYearlyRevenueReport(c *gin.Context) {
 	}
 
 	// Get revenue report
-	report, err := h.flightService.GetYearlyRevenueReport(year)
+	report, err := f.flightService.GetYearlyRevenueReport(year)
 	if err != nil {
 		_ = c.Error(err)
 		return

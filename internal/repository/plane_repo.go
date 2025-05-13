@@ -29,9 +29,9 @@ func (p planeRepository) GetSeatByNumberAndPlaneCode(seatNumber, planeCode strin
 		First(&seat)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-			return nil, exceptions.NotFound("seat", seatNumber)
+			return nil, exceptions.NotFoundError("seat", seatNumber)
 		}
-		return nil, exceptions.Internal("failed to get seat by number and plane code", result.Error)
+		return nil, exceptions.InternalError("failed to get seat by number and plane code", result.Error)
 	}
 	return &seat, nil
 }
@@ -40,7 +40,7 @@ func (p planeRepository) GetAll() ([]*models.Plane, error) {
 	planes := make([]*models.Plane, 0)
 
 	if err := p.db.Find(&planes).Error; err != nil {
-		return nil, exceptions.Internal("failed to get all planes", err)
+		return nil, exceptions.InternalError("failed to get all planes", err)
 	}
 
 	return planes, nil
@@ -53,9 +53,9 @@ func (p planeRepository) GetByCode(code string) (*models.Plane, error) {
 		First(&plane)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-			return nil, exceptions.NotFound("plane", code)
+			return nil, exceptions.NotFoundError("plane", code)
 		}
-		return nil, exceptions.Internal("failed to get plane by code", result.Error)
+		return nil, exceptions.InternalError("failed to get plane by code", result.Error)
 	}
 	return &plane, nil
 }
@@ -65,9 +65,9 @@ func (p planeRepository) GetByID(id uint) (*models.Plane, error) {
 	result := p.db.Where("id = ?", id).First(&plane)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-			return nil, exceptions.NotFound("plane", strconv.Itoa(int(id)))
+			return nil, exceptions.NotFoundError("plane", strconv.Itoa(int(id)))
 		}
-		return nil, exceptions.Internal("failed to get plane by id", result.Error)
+		return nil, exceptions.InternalError("failed to get plane by id", result.Error)
 	}
 	return &plane, nil
 }

@@ -16,7 +16,7 @@ const (
 	RoleStaff      Role = "STAFF"
 )
 
-// Ticket status constants
+// TicketStatus Ticket status constants
 type TicketStatus string
 
 const (
@@ -27,7 +27,7 @@ const (
 	TicketStatusRefunded  TicketStatus = "REFUNDED"  // Ticket has been refunded
 )
 
-// Booking type constants
+// BookingType Booking type constants
 type BookingType string
 
 const (

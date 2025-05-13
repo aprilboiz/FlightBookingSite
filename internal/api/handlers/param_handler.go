@@ -27,7 +27,7 @@ type paramHandler struct {
 //	@Success		200	{array}		models.Parameter
 //	@Failure		500	{object}	dto.ErrorResponse
 //	@Router			/api/params [get]
-func (p paramHandler) GetAllParameters(c *gin.Context) {
+func (p *paramHandler) GetAllParameters(c *gin.Context) {
 	params, err := p.paramService.GetAllParams()
 	if err != nil {
 		_ = c.Error(err)
@@ -47,15 +47,15 @@ func (p paramHandler) GetAllParameters(c *gin.Context) {
 //	@Success		200		{array}		models.Parameter
 //	@Failure		500		{object}	dto.ErrorResponse
 //	@Router			/api/params [put]
-func (p paramHandler) UpdateParameters(c *gin.Context) {
+func (p *paramHandler) UpdateParameters(c *gin.Context) {
 	validatedModel, exists := c.Get("validatedModel")
 	if !exists {
-		_ = c.Error(e.NewAppError(e.INTERNAL_ERROR, "Cannot find validated model in context", nil))
+		_ = c.Error(e.NewAppError(e.INTERNAL, "Cannot find validated model in context", nil))
 		return
 	}
 	paramRequest, ok := validatedModel.(*models.Parameter)
 	if !ok {
-		_ = c.Error(e.NewAppError(e.INTERNAL_ERROR, "Cannot cast validated model to ParameterRequest", nil))
+		_ = c.Error(e.NewAppError(e.INTERNAL, "Cannot cast validated model to ParameterRequest", nil))
 		return
 	}
 	paramResponse, err := p.paramService.UpdateParams(paramRequest)

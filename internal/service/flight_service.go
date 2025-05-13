@@ -43,7 +43,7 @@ func (g *flightCodeGenerator) Generate() (string, error) {
 
 	nextID, err := database.PeekUpcomingFlightId()
 	if err != nil {
-		return "", exceptions.Internal("failed to get next ID", err)
+		return "", exceptions.InternalError("failed to get next ID", err)
 	}
 
 	// Format the ID according to the configured format
@@ -54,7 +54,7 @@ func (g *flightCodeGenerator) Generate() (string, error) {
 
 	// Validate the generated code
 	if len(flightCode) > 20 { // Reasonable maximum length for a flight code
-		return "", exceptions.Internal("generated flight code exceeds maximum length", nil)
+		return "", exceptions.InternalError("generated flight code exceeds maximum length", nil)
 	}
 
 	return flightCode, nil
@@ -74,7 +74,7 @@ func NewFlightService(flightRepo repository.FlightRepository, airportRepo reposi
 	}
 }
 
-// Helper structs for seat counting
+// PlaneSeatCount Helper structs for seat counting
 type PlaneSeatCount struct {
 	PlaneID    uint  `gorm:"column:plane_id"`
 	TotalSeats int64 `gorm:"column:total_seats"`
@@ -94,7 +94,7 @@ func (f flightService) getTotalSeatsForPlane(planeID uint) (int64, error) {
 		Group("plane_id").
 		Find(&planeSeatCounts)
 	if result.Error != nil {
-		return 0, exceptions.Internal("failed to count total seats", result.Error)
+		return 0, exceptions.InternalError("failed to count total seats", result.Error)
 	}
 	if len(planeSeatCounts) == 0 {
 		return 0, nil
@@ -111,7 +111,7 @@ func (f flightService) getBookedSeatsForFlight(flightID uint) (int64, error) {
 		Group("flight_id").
 		Find(&flightBookedCounts)
 	if result.Error != nil {
-		return 0, exceptions.Internal("failed to count booked seats", result.Error)
+		return 0, exceptions.InternalError("failed to count booked seats", result.Error)
 	}
 	if len(flightBookedCounts) == 0 {
 		return 0, nil
@@ -137,7 +137,7 @@ func (f flightService) getSeatCountsForFlights(flights []*models.Flight) (map[ui
 		Group("plane_id").
 		Find(&planeSeatCounts)
 	if result.Error != nil {
-		return nil, nil, exceptions.Internal("failed to count total seats", result.Error)
+		return nil, nil, exceptions.InternalError("failed to count total seats", result.Error)
 	}
 
 	// Convert to map for easier lookup
@@ -154,7 +154,7 @@ func (f flightService) getSeatCountsForFlights(flights []*models.Flight) (map[ui
 		Group("flight_id").
 		Find(&flightBookedCounts)
 	if result.Error != nil {
-		return nil, nil, exceptions.Internal("failed to count booked seats", result.Error)
+		return nil, nil, exceptions.InternalError("failed to count booked seats", result.Error)
 	}
 
 	// Convert to map for easier lookup
@@ -179,7 +179,7 @@ func (f flightService) GetAllFlights() ([]*dto.FlightResponse, error) {
 				Err:        appErr.Err,
 			}
 		}
-		return nil, exceptions.Internal("Unexpected error retrieving flights", err)
+		return nil, exceptions.InternalError("Unexpected error retrieving flights", err)
 	}
 
 	// If there are no flights, return an empty list
@@ -240,7 +240,7 @@ func (f flightService) GetFlightByCode(flightCode string) (*dto.FlightResponseDe
 				Err:        appErr.Err,
 			}
 		}
-		return nil, exceptions.Internal("Unexpected error retrieving flight", err)
+		return nil, exceptions.InternalError("Unexpected error retrieving flight", err)
 	}
 
 	// Get seat counts using helper functions
@@ -268,7 +268,7 @@ func (f flightService) GetFlightByCode(flightCode string) (*dto.FlightResponseDe
 		Group("ticket_classes.ticket_class_name").
 		Find(&seatClassCounts)
 	if result.Error != nil {
-		return nil, exceptions.Internal("failed to get seat class counts", result.Error)
+		return nil, exceptions.InternalError("failed to get seat class counts", result.Error)
 	}
 
 	// Get booked seats by class
@@ -281,7 +281,7 @@ func (f flightService) GetFlightByCode(flightCode string) (*dto.FlightResponseDe
 				flight.ID, models.TicketStatusActive, seatClassCounts[i].Class).
 			Count(&bookedCount)
 		if result.Error != nil {
-			return nil, exceptions.Internal("failed to get booked seats by class", result.Error)
+			return nil, exceptions.InternalError("failed to get booked seats by class", result.Error)
 		}
 		seatClassCounts[i].BookedSeats = bookedCount
 	}
@@ -293,7 +293,7 @@ func (f flightService) GetFlightByCode(flightCode string) (*dto.FlightResponseDe
 		Where("plane_id = ?", flight.PlaneID).
 		Find(&seats)
 	if result.Error != nil {
-		return nil, exceptions.Internal("failed to get seats", result.Error)
+		return nil, exceptions.InternalError("failed to get seats", result.Error)
 	}
 
 	// Get all active tickets for this flight
@@ -302,7 +302,7 @@ func (f flightService) GetFlightByCode(flightCode string) (*dto.FlightResponseDe
 		Where("flight_id = ? AND ticket_status = ?", flight.ID, models.TicketStatusActive).
 		Find(&tickets)
 	if result.Error != nil {
-		return nil, exceptions.Internal("failed to get tickets", result.Error)
+		return nil, exceptions.InternalError("failed to get tickets", result.Error)
 	}
 
 	// Create a map of seat ID to ticket for quick lookup
@@ -378,24 +378,24 @@ func (f flightService) Create(flightRequest *dto.FlightRequest) (*dto.FlightResp
 		if errors.As(err, &appErr) {
 			return nil, appErr
 		}
-		return nil, exceptions.Internal("failed to get all params", err)
+		return nil, exceptions.InternalError("failed to get all params", err)
 	}
 
 	// 2. Validate basic flight requirements
 	if flightRequest.DepartureAirport == flightRequest.ArrivalAirport {
-		return nil, exceptions.BadRequest("departure and arrival airports cannot be the same", nil)
+		return nil, exceptions.BadRequestError("departure and arrival airports cannot be the same", nil)
 	}
 
 	// 3. Validate flight duration
 	if flightRequest.Duration < params.MinFlightDuration {
-		return nil, exceptions.BadRequest(fmt.Sprintf("flight duration must be at least %d minutes", params.MinFlightDuration), nil)
+		return nil, exceptions.BadRequestError(fmt.Sprintf("flight duration must be at least %d minutes", params.MinFlightDuration), nil)
 	}
 
 	// 4. Validate intermediate stops
 	if len(flightRequest.IntermediateStop) > 0 {
 		// Check maximum number of stops
 		if len(flightRequest.IntermediateStop) > params.MaxIntermediateStops {
-			return nil, exceptions.BadRequest(fmt.Sprintf("maximum number of intermediate stops is %d", params.MaxIntermediateStops), nil)
+			return nil, exceptions.BadRequestError(fmt.Sprintf("maximum number of intermediate stops is %d", params.MaxIntermediateStops), nil)
 		}
 
 		// Check for duplicate stops
@@ -403,23 +403,23 @@ func (f flightService) Create(flightRequest *dto.FlightRequest) (*dto.FlightResp
 		for _, stop := range flightRequest.IntermediateStop {
 			// Check if stop is same as departure or arrival
 			if stop.StopAirport == flightRequest.DepartureAirport {
-				return nil, exceptions.BadRequest("intermediate stop cannot be the same as departure airport", nil)
+				return nil, exceptions.BadRequestError("intermediate stop cannot be the same as departure airport", nil)
 			}
 			if stop.StopAirport == flightRequest.ArrivalAirport {
-				return nil, exceptions.BadRequest("intermediate stop cannot be the same as arrival airport", nil)
+				return nil, exceptions.BadRequestError("intermediate stop cannot be the same as arrival airport", nil)
 			}
 
 			// Check for duplicate stops
 			if stopMap[stop.StopAirport] {
-				return nil, exceptions.BadRequest(fmt.Sprintf("duplicate intermediate stop airport: %s", stop.StopAirport), nil)
+				return nil, exceptions.BadRequestError(fmt.Sprintf("duplicate intermediate stop airport: %s", stop.StopAirport), nil)
 			}
 
 			// Validate stop duration
 			if stop.StopDuration < params.MinIntermediateStopDuration {
-				return nil, exceptions.BadRequest(fmt.Sprintf("minimum intermediate stop duration is %d minutes", params.MinIntermediateStopDuration), nil)
+				return nil, exceptions.BadRequestError(fmt.Sprintf("minimum intermediate stop duration is %d minutes", params.MinIntermediateStopDuration), nil)
 			}
 			if stop.StopDuration > params.MaxIntermediateStopDuration {
-				return nil, exceptions.BadRequest(fmt.Sprintf("maximum intermediate stop duration is %d minutes", params.MaxIntermediateStopDuration), nil)
+				return nil, exceptions.BadRequestError(fmt.Sprintf("maximum intermediate stop duration is %d minutes", params.MaxIntermediateStopDuration), nil)
 			}
 
 			stopMap[stop.StopAirport] = true
@@ -429,10 +429,10 @@ func (f flightService) Create(flightRequest *dto.FlightRequest) (*dto.FlightResp
 		stopOrders := make(map[int]bool)
 		for _, stop := range flightRequest.IntermediateStop {
 			if stop.StopOrder < 1 {
-				return nil, exceptions.BadRequest("stop order must be greater than 0", nil)
+				return nil, exceptions.BadRequestError("stop order must be greater than 0", nil)
 			}
 			if stopOrders[stop.StopOrder] {
-				return nil, exceptions.BadRequest(fmt.Sprintf("duplicate stop order: %d", stop.StopOrder), nil)
+				return nil, exceptions.BadRequestError(fmt.Sprintf("duplicate stop order: %d", stop.StopOrder), nil)
 			}
 			stopOrders[stop.StopOrder] = true
 		}
@@ -450,7 +450,7 @@ func (f flightService) Create(flightRequest *dto.FlightRequest) (*dto.FlightResp
 				Err:        appErr.Err,
 			}
 		}
-		return nil, exceptions.Internal("failed to generate flight code", err)
+		return nil, exceptions.InternalError("failed to generate flight code", err)
 	}
 
 	// 6. Validate and get plane
@@ -460,7 +460,7 @@ func (f flightService) Create(flightRequest *dto.FlightRequest) (*dto.FlightResp
 		if errors.As(err, &appErr) {
 			return nil, appErr
 		}
-		return nil, exceptions.Internal("failed to get plane by code", err)
+		return nil, exceptions.InternalError("failed to get plane by code", err)
 	}
 
 	// 7. Validate and get airports
@@ -470,7 +470,7 @@ func (f flightService) Create(flightRequest *dto.FlightRequest) (*dto.FlightResp
 		if errors.As(err, &appErr) {
 			return nil, appErr
 		}
-		return nil, exceptions.Internal("failed to get departure airport by code", err)
+		return nil, exceptions.InternalError("failed to get departure airport by code", err)
 	}
 
 	arrivalAirport, err := f.airportRepo.GetByCode(flightRequest.ArrivalAirport)
@@ -479,19 +479,19 @@ func (f flightService) Create(flightRequest *dto.FlightRequest) (*dto.FlightResp
 		if errors.As(err, &appErr) {
 			return nil, appErr
 		}
-		return nil, exceptions.Internal("failed to get arrival airport by code", err)
+		return nil, exceptions.InternalError("failed to get arrival airport by code", err)
 	}
 
 	// 8. Parse and validate departure date time
 	loc, _ := time.LoadLocation(config.GetConfig().Database.Timezone)
 	departureDateTime, err := time.ParseInLocation(time.DateTime, flightRequest.DepartureDateTime, loc)
 	if err != nil {
-		return nil, exceptions.BadRequest("invalid departure date time format", err)
+		return nil, exceptions.BadRequestError("invalid departure date time format", err)
 	}
 
 	// Validate departure is not in the past
 	if departureDateTime.Before(time.Now()) {
-		return nil, exceptions.BadRequest("departure date time cannot be in the past", nil)
+		return nil, exceptions.BadRequestError("departure date time cannot be in the past", nil)
 	}
 
 	// 9. Create the flight and intermediate stops in a transaction
@@ -509,7 +509,7 @@ func (f flightService) Create(flightRequest *dto.FlightRequest) (*dto.FlightResp
 		}
 
 		if err := tx.Create(newFlight).Error; err != nil {
-			return exceptions.Internal("failed to create flight", err)
+			return exceptions.InternalError("failed to create flight", err)
 		}
 		createdFlight = newFlight
 
@@ -523,7 +523,7 @@ func (f flightService) Create(flightRequest *dto.FlightRequest) (*dto.FlightResp
 					if errors.As(err, &appErr) {
 						return appErr
 					}
-					return exceptions.Internal("failed to get intermediate airport by code", err)
+					return exceptions.InternalError("failed to get intermediate airport by code", err)
 				}
 				intermediateStops[i] = &models.IntermediateStop{
 					FlightID:     createdFlight.ID,
@@ -534,7 +534,7 @@ func (f flightService) Create(flightRequest *dto.FlightRequest) (*dto.FlightResp
 				}
 			}
 			if err := tx.Create(&intermediateStops).Error; err != nil {
-				return exceptions.Internal("failed to create intermediate stops", err)
+				return exceptions.InternalError("failed to create intermediate stops", err)
 			}
 		}
 
@@ -552,7 +552,7 @@ func (f flightService) Create(flightRequest *dto.FlightRequest) (*dto.FlightResp
 	// 10. Get the complete flight with all relations
 	createdFlight, err = f.flightRepo.GetByCode(createdFlight.FlightCode)
 	if err != nil {
-		return nil, exceptions.Internal("failed to get created flight by code", err)
+		return nil, exceptions.InternalError("failed to get created flight by code", err)
 	}
 
 	// Get seat counts
@@ -600,7 +600,7 @@ func (f flightService) Update(flightCode string, flightRequest *dto.FlightReques
 		if errors.As(err, &appErr) {
 			return nil, appErr
 		}
-		return nil, exceptions.Internal("failed to get flight by code", err)
+		return nil, exceptions.InternalError("failed to get flight by code", err)
 	}
 
 	// Get parameters for validation
@@ -610,24 +610,24 @@ func (f flightService) Update(flightCode string, flightRequest *dto.FlightReques
 		if errors.As(err, &appErr) {
 			return nil, appErr
 		}
-		return nil, exceptions.Internal("failed to get all params", err)
+		return nil, exceptions.InternalError("failed to get all params", err)
 	}
 
 	// Validate basic flight requirements
 	if flightRequest.DepartureAirport == flightRequest.ArrivalAirport {
-		return nil, exceptions.BadRequest("departure and arrival airports cannot be the same", nil)
+		return nil, exceptions.BadRequestError("departure and arrival airports cannot be the same", nil)
 	}
 
 	// Validate flight duration
 	if flightRequest.Duration < params.MinFlightDuration {
-		return nil, exceptions.BadRequest(fmt.Sprintf("flight duration must be at least %d minutes", params.MinFlightDuration), nil)
+		return nil, exceptions.BadRequestError(fmt.Sprintf("flight duration must be at least %d minutes", params.MinFlightDuration), nil)
 	}
 
 	// Validate intermediate stops
 	if len(flightRequest.IntermediateStop) > 0 {
 		// Check maximum number of stops
 		if len(flightRequest.IntermediateStop) > params.MaxIntermediateStops {
-			return nil, exceptions.BadRequest(fmt.Sprintf("maximum number of intermediate stops is %d", params.MaxIntermediateStops), nil)
+			return nil, exceptions.BadRequestError(fmt.Sprintf("maximum number of intermediate stops is %d", params.MaxIntermediateStops), nil)
 		}
 
 		// Check for duplicate stops
@@ -635,23 +635,23 @@ func (f flightService) Update(flightCode string, flightRequest *dto.FlightReques
 		for _, stop := range flightRequest.IntermediateStop {
 			// Check if stop is same as departure or arrival
 			if stop.StopAirport == flightRequest.DepartureAirport {
-				return nil, exceptions.BadRequest("intermediate stop cannot be the same as departure airport", nil)
+				return nil, exceptions.BadRequestError("intermediate stop cannot be the same as departure airport", nil)
 			}
 			if stop.StopAirport == flightRequest.ArrivalAirport {
-				return nil, exceptions.BadRequest("intermediate stop cannot be the same as arrival airport", nil)
+				return nil, exceptions.BadRequestError("intermediate stop cannot be the same as arrival airport", nil)
 			}
 
 			// Check for duplicate stops
 			if stopMap[stop.StopAirport] {
-				return nil, exceptions.BadRequest(fmt.Sprintf("duplicate intermediate stop airport: %s", stop.StopAirport), nil)
+				return nil, exceptions.BadRequestError(fmt.Sprintf("duplicate intermediate stop airport: %s", stop.StopAirport), nil)
 			}
 
 			// Validate stop duration
 			if stop.StopDuration < params.MinIntermediateStopDuration {
-				return nil, exceptions.BadRequest(fmt.Sprintf("minimum intermediate stop duration is %d minutes", params.MinIntermediateStopDuration), nil)
+				return nil, exceptions.BadRequestError(fmt.Sprintf("minimum intermediate stop duration is %d minutes", params.MinIntermediateStopDuration), nil)
 			}
 			if stop.StopDuration > params.MaxIntermediateStopDuration {
-				return nil, exceptions.BadRequest(fmt.Sprintf("maximum intermediate stop duration is %d minutes", params.MaxIntermediateStopDuration), nil)
+				return nil, exceptions.BadRequestError(fmt.Sprintf("maximum intermediate stop duration is %d minutes", params.MaxIntermediateStopDuration), nil)
 			}
 
 			stopMap[stop.StopAirport] = true
@@ -665,7 +665,7 @@ func (f flightService) Update(flightCode string, flightRequest *dto.FlightReques
 		if errors.As(err, &appErr) {
 			return nil, appErr
 		}
-		return nil, exceptions.Internal("failed to get plane by code", err)
+		return nil, exceptions.InternalError("failed to get plane by code", err)
 	}
 
 	// Validate and get airports
@@ -675,7 +675,7 @@ func (f flightService) Update(flightCode string, flightRequest *dto.FlightReques
 		if errors.As(err, &appErr) {
 			return nil, appErr
 		}
-		return nil, exceptions.Internal("failed to get departure airport by code", err)
+		return nil, exceptions.InternalError("failed to get departure airport by code", err)
 	}
 
 	arrivalAirport, err := f.airportRepo.GetByCode(flightRequest.ArrivalAirport)
@@ -684,14 +684,14 @@ func (f flightService) Update(flightCode string, flightRequest *dto.FlightReques
 		if errors.As(err, &appErr) {
 			return nil, appErr
 		}
-		return nil, exceptions.Internal("failed to get arrival airport by code", err)
+		return nil, exceptions.InternalError("failed to get arrival airport by code", err)
 	}
 
 	// Parse and validate departure date time
 	loc, _ := time.LoadLocation(config.GetConfig().Database.Timezone)
 	departureDateTime, err := time.ParseInLocation(time.DateTime, flightRequest.DepartureDateTime, loc)
 	if err != nil {
-		return nil, exceptions.BadRequest("invalid departure date time format", err)
+		return nil, exceptions.BadRequestError("invalid departure date time format", err)
 	}
 
 	// Update flight fields
@@ -709,12 +709,12 @@ func (f flightService) Update(flightCode string, flightRequest *dto.FlightReques
 		if errors.As(err, &appErr) {
 			return nil, appErr
 		}
-		return nil, exceptions.Internal("failed to update flight", err)
+		return nil, exceptions.InternalError("failed to update flight", err)
 	}
 
 	// Delete existing intermediate stops
 	if err := f.flightRepo.DeleteIntermediateStops(updatedFlight.ID); err != nil {
-		return nil, exceptions.Internal("failed to delete existing intermediate stops", err)
+		return nil, exceptions.InternalError("failed to delete existing intermediate stops", err)
 	}
 
 	// Create new intermediate stops if any
@@ -727,7 +727,7 @@ func (f flightService) Update(flightCode string, flightRequest *dto.FlightReques
 				if errors.As(err, &appErr) {
 					return nil, appErr
 				}
-				return nil, exceptions.Internal("failed to get intermediate airport by code", err)
+				return nil, exceptions.InternalError("failed to get intermediate airport by code", err)
 			}
 			intermediateStops[i] = &models.IntermediateStop{
 				FlightID:     updatedFlight.ID,
@@ -743,14 +743,14 @@ func (f flightService) Update(flightCode string, flightRequest *dto.FlightReques
 			if errors.As(err, &appErr) {
 				return nil, appErr
 			}
-			return nil, exceptions.Internal("failed to create intermediate stops", err)
+			return nil, exceptions.InternalError("failed to create intermediate stops", err)
 		}
 	}
 
 	// Get the complete updated flight with all relations
 	updatedFlight, err = f.flightRepo.GetByCode(updatedFlight.FlightCode)
 	if err != nil {
-		return nil, exceptions.Internal("failed to get updated flight by code", err)
+		return nil, exceptions.InternalError("failed to get updated flight by code", err)
 	}
 
 	// Get seat counts
@@ -798,21 +798,21 @@ func (f flightService) Delete(code string) error {
 		if errors.As(err, &appErr) {
 			return appErr
 		}
-		return exceptions.Internal("failed to get flight by code", err)
+		return exceptions.InternalError("failed to get flight by code", err)
 	}
 
 	// Check if there are any active tickets for this flight
 	activeTickets, err := f.ticketRepo.GetActiveTicketsByFlightID(flight.ID)
 	if err != nil {
-		return exceptions.Internal("failed to check active tickets", err)
+		return exceptions.InternalError("failed to check active tickets", err)
 	}
 	if len(activeTickets) > 0 {
-		return exceptions.BadRequest("cannot delete flight with active tickets", nil)
+		return exceptions.BadRequestError("cannot delete flight with active tickets", nil)
 	}
 
 	// Delete intermediate stops first
 	if err := f.flightRepo.DeleteIntermediateStops(flight.ID); err != nil {
-		return exceptions.Internal("failed to delete intermediate stops", err)
+		return exceptions.InternalError("failed to delete intermediate stops", err)
 	}
 
 	// Delete the flight
@@ -821,7 +821,7 @@ func (f flightService) Delete(code string) error {
 		if errors.As(err, &appErr) {
 			return appErr
 		}
-		return exceptions.Internal("failed to delete flight", err)
+		return exceptions.InternalError("failed to delete flight", err)
 	}
 
 	return nil
@@ -840,7 +840,7 @@ func (f flightService) GetAllFlightsInList() ([]*dto.FlightListResponse, error) 
 				Err:        appErr.Err,
 			}
 		}
-		return nil, exceptions.Internal("Unexpected error retrieving flights", err)
+		return nil, exceptions.InternalError("Unexpected error retrieving flights", err)
 	}
 
 	// If there are no flights, return an empty list
@@ -888,7 +888,7 @@ func (f flightService) GetAllFlightsInList() ([]*dto.FlightListResponse, error) 
 func (f flightService) GetMonthlyRevenueReport(year int, month int) (*dto.MonthlyRevenueReport, error) {
 	// Validate month
 	if month < 1 || month > 12 {
-		return nil, exceptions.BadRequest("invalid month", nil)
+		return nil, exceptions.BadRequestError("invalid month", nil)
 	}
 
 	// Get start and end dates for the month
@@ -898,7 +898,7 @@ func (f flightService) GetMonthlyRevenueReport(year int, month int) (*dto.Monthl
 	// Get all flights in the month
 	flights, err := f.flightRepo.GetFlightsByDateRange(startDate, endDate)
 	if err != nil {
-		return nil, exceptions.Internal("failed to get flights", err)
+		return nil, exceptions.InternalError("failed to get flights", err)
 	}
 
 	// Initialize report
@@ -912,7 +912,7 @@ func (f flightService) GetMonthlyRevenueReport(year int, month int) (*dto.Monthl
 		// Get all tickets for this flight
 		tickets, err := f.ticketRepo.GetTicketsByFlightID(flight.ID)
 		if err != nil {
-			return nil, exceptions.Internal("failed to get tickets", err)
+			return nil, exceptions.InternalError("failed to get tickets", err)
 		}
 
 		// Calculate actual revenue and number of active tickets
@@ -978,7 +978,7 @@ func (f flightService) GetYearlyRevenueReport(year int) (*dto.YearlyRevenueRepor
 		// Get all flights in the month
 		flights, err := f.flightRepo.GetFlightsByDateRange(startDate, endDate)
 		if err != nil {
-			return nil, exceptions.Internal("failed to get flights", err)
+			return nil, exceptions.InternalError("failed to get flights", err)
 		}
 
 		// Skip if no flights in this month
@@ -998,7 +998,7 @@ func (f flightService) GetYearlyRevenueReport(year int) (*dto.YearlyRevenueRepor
 			// Get all tickets for this flight
 			tickets, err := f.ticketRepo.GetTicketsByFlightID(flight.ID)
 			if err != nil {
-				return nil, exceptions.Internal("failed to get tickets", err)
+				return nil, exceptions.InternalError("failed to get tickets", err)
 			}
 
 			// Calculate actual revenue and active seats

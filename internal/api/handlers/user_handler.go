@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/aprilboiz/flight-management/internal/dto"
@@ -22,7 +23,8 @@ func NewUserHandler(userService service.UserService, logger *zap.Logger) UserHan
 	}
 }
 
-// Register handles user registration
+// Register godoc
+//
 //	@Summary		Register a new user
 //	@Description	Register a new user with username, password, and email
 //	@Tags			auth
@@ -36,18 +38,18 @@ func NewUserHandler(userService service.UserService, logger *zap.Logger) UserHan
 func (h *userHandler) Register(c *gin.Context) {
 	var req dto.RegisterRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		_ = c.Error(e.BadRequest("Invalid request body", err))
+		_ = c.Error(e.BadRequestError("Invalid request body", err))
 		return
 	}
 
 	response, err := h.userService.Register(req)
 	if err != nil {
-		switch err {
-		case service.ErrUserExists:
+		switch {
+		case errors.Is(err, service.ErrUserExists):
 			_ = c.Error(e.NewAppError(e.CONFLICT, "User already exists", nil))
 		default:
 			h.logger.Error("Failed to register user", zap.Error(err))
-			_ = c.Error(e.Internal("Failed to register user", err))
+			_ = c.Error(e.InternalError("Failed to register user", err))
 		}
 		return
 	}
@@ -55,7 +57,8 @@ func (h *userHandler) Register(c *gin.Context) {
 	c.JSON(http.StatusOK, response)
 }
 
-// Login handles user login
+// Login godoc
+//
 //	@Summary		Login user
 //	@Description	Login with username and password
 //	@Tags			auth
@@ -69,18 +72,18 @@ func (h *userHandler) Register(c *gin.Context) {
 func (h *userHandler) Login(c *gin.Context) {
 	var req dto.LoginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		_ = c.Error(e.BadRequest("Invalid request body", err))
+		_ = c.Error(e.BadRequestError("Invalid request body", err))
 		return
 	}
 
 	response, err := h.userService.Login(req)
 	if err != nil {
-		switch err {
-		case service.ErrInvalidCredentials:
+		switch {
+		case errors.Is(err, service.ErrInvalidCredentials):
 			_ = c.Error(e.NewAppError(e.UNAUTHORIZED, "Invalid credentials", nil))
 		default:
 			h.logger.Error("Failed to login user", zap.Error(err))
-			_ = c.Error(e.Internal("Failed to login", err))
+			_ = c.Error(e.InternalError("Failed to login", err))
 		}
 		return
 	}

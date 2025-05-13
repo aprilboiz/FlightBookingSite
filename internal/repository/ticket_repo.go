@@ -13,19 +13,19 @@ type ticketRepository struct {
 	db *gorm.DB
 }
 
-func (t ticketRepository) GetAll() ([]*models.Ticket, error) {
+func (t *ticketRepository) GetAll() ([]*models.Ticket, error) {
 	var tickets []*models.Ticket
 	result := t.db.
 		Preload("Flight").
 		Preload("Seat").
 		Find(&tickets)
 	if result.Error != nil {
-		return nil, exceptions.Internal("failed to get all tickets", result.Error)
+		return nil, exceptions.InternalError("failed to get all tickets", result.Error)
 	}
 	return tickets, nil
 }
 
-func (t ticketRepository) GetByID(id uint) (*models.Ticket, error) {
+func (t *ticketRepository) GetByID(id uint) (*models.Ticket, error) {
 	var ticket models.Ticket
 	result := t.db.
 		Preload("Flight").
@@ -34,22 +34,22 @@ func (t ticketRepository) GetByID(id uint) (*models.Ticket, error) {
 		First(&ticket)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-			return nil, exceptions.NotFound("flight", strconv.Itoa(int(id)))
+			return nil, exceptions.NotFoundError("flight", strconv.Itoa(int(id)))
 		}
-		return nil, exceptions.Internal("failed to get flight by id", result.Error)
+		return nil, exceptions.InternalError("failed to get flight by id", result.Error)
 	}
 	return &ticket, nil
 }
 
-func (t ticketRepository) Create(ticket *models.Ticket) (*models.Ticket, error) {
+func (t *ticketRepository) Create(ticket *models.Ticket) (*models.Ticket, error) {
 	result := t.db.Create(ticket)
 	if result.Error != nil {
-		return nil, exceptions.Internal("failed to create ticket", result.Error)
+		return nil, exceptions.InternalError("failed to create ticket", result.Error)
 	}
 	return ticket, nil
 }
 
-func (t ticketRepository) GetByFlightID(flightID uint) ([]*models.Ticket, error) {
+func (t *ticketRepository) GetByFlightID(flightID uint) ([]*models.Ticket, error) {
 	var tickets []*models.Ticket
 	result := t.db.
 		Preload("Flight").
@@ -57,12 +57,12 @@ func (t ticketRepository) GetByFlightID(flightID uint) ([]*models.Ticket, error)
 		Where("flight_id = ?", flightID).
 		Find(&tickets)
 	if result.Error != nil {
-		return nil, exceptions.Internal("failed to get tickets by flight ID", result.Error)
+		return nil, exceptions.InternalError("failed to get tickets by flight ID", result.Error)
 	}
 	return tickets, nil
 }
 
-func (t ticketRepository) GetActiveTicketsByFlightID(flightID uint) ([]*models.Ticket, error) {
+func (t *ticketRepository) GetActiveTicketsByFlightID(flightID uint) ([]*models.Ticket, error) {
 	var tickets []*models.Ticket
 	result := t.db.
 		Preload("Flight").
@@ -70,46 +70,46 @@ func (t ticketRepository) GetActiveTicketsByFlightID(flightID uint) ([]*models.T
 		Where("flight_id = ? AND ticket_status = ?", flightID, models.TicketStatusActive).
 		Find(&tickets)
 	if result.Error != nil {
-		return nil, exceptions.Internal("failed to get active tickets by flight ID", result.Error)
+		return nil, exceptions.InternalError("failed to get active tickets by flight ID", result.Error)
 	}
 	return tickets, nil
 }
 
-func (t ticketRepository) UpdateTicketStatus(ticketID uint, status models.TicketStatus) error {
+func (t *ticketRepository) UpdateTicketStatus(ticketID uint, status models.TicketStatus) error {
 	result := t.db.Model(&models.Ticket{}).Where("id = ?", ticketID).Update("ticket_status", status)
 	if result.Error != nil {
-		return exceptions.Internal("failed to update ticket status", result.Error)
+		return exceptions.InternalError("failed to update ticket status", result.Error)
 	}
 	return nil
 }
 
-func (t ticketRepository) Update(ticket *models.Ticket) (*models.Ticket, error) {
+func (t *ticketRepository) Update(ticket *models.Ticket) (*models.Ticket, error) {
 	result := t.db.Save(ticket)
 	if result.Error != nil {
-		return nil, exceptions.Internal("failed to update ticket", result.Error)
+		return nil, exceptions.InternalError("failed to update ticket", result.Error)
 	}
 	return ticket, nil
 }
 
-func (t ticketRepository) GetDB() *gorm.DB {
+func (t *ticketRepository) GetDB() *gorm.DB {
 	return t.db
 }
 
-func (t ticketRepository) Delete(id uint) error {
+func (t *ticketRepository) Delete(id uint) error {
 	result := t.db.Delete(&models.Ticket{}, id)
 	if result.Error != nil {
-		return exceptions.Internal("failed to delete ticket", result.Error)
+		return exceptions.InternalError("failed to delete ticket", result.Error)
 	}
 	return nil
 }
 
-func (r *ticketRepository) GetTicketsByFlightID(flightID uint) ([]*models.Ticket, error) {
+func (t *ticketRepository) GetTicketsByFlightID(flightID uint) ([]*models.Ticket, error) {
 	var tickets []*models.Ticket
-	result := r.db.
+	result := t.db.
 		Where("flight_id = ?", flightID).
 		Find(&tickets)
 	if result.Error != nil {
-		return nil, exceptions.Internal("failed to get tickets by flight ID", result.Error)
+		return nil, exceptions.InternalError("failed to get tickets by flight ID", result.Error)
 	}
 	return tickets, nil
 }

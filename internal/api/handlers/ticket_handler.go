@@ -14,6 +14,7 @@ type ticketHandler struct {
 	ticketService service.TicketService
 }
 
+// GetAllTickets godoc
 //	@Summary		Get all tickets
 //	@Description	Retrieve a list of all tickets in the system
 //	@Tags			tickets
@@ -22,7 +23,7 @@ type ticketHandler struct {
 //	@Success		200	{array}		dto.TicketResponse
 //	@Failure		500	{object}	exceptions.AppError
 //	@Router			/tickets [get]
-func (t ticketHandler) GetAllTickets(c *gin.Context) {
+func (t *ticketHandler) GetAllTickets(c *gin.Context) {
 	tickets, err := t.ticketService.GetAllTickets()
 	if err != nil {
 		_ = c.Error(err)
@@ -31,6 +32,7 @@ func (t ticketHandler) GetAllTickets(c *gin.Context) {
 	c.JSON(http.StatusOK, tickets)
 }
 
+// GetTicketByID godoc
 //	@Summary		Get ticket by ID
 //	@Description	Retrieve a specific ticket by its ID
 //	@Tags			tickets
@@ -41,11 +43,11 @@ func (t ticketHandler) GetAllTickets(c *gin.Context) {
 //	@Failure		404	{object}	exceptions.AppError
 //	@Failure		500	{object}	exceptions.AppError
 //	@Router			/tickets/{id} [get]
-func (t ticketHandler) GetTicketByID(c *gin.Context) {
+func (t *ticketHandler) GetTicketByID(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := strconv.ParseUint(idStr, 10, 32)
 	if err != nil {
-		_ = c.Error(e.NewAppError(e.BAD_REQUEST, "Invalid ticket ID format", err))
+		_ = c.Error(e.NewAppError(e.BadRequest, "Invalid ticket ID format", err))
 		return
 	}
 
@@ -57,6 +59,7 @@ func (t ticketHandler) GetTicketByID(c *gin.Context) {
 	c.JSON(http.StatusOK, ticket)
 }
 
+// CreateTicket godoc
 //	@Summary		Create a new ticket
 //	@Description	Create a new ticket with the provided information
 //	@Tags			tickets
@@ -67,15 +70,15 @@ func (t ticketHandler) GetTicketByID(c *gin.Context) {
 //	@Failure		400		{object}	exceptions.AppError
 //	@Failure		500		{object}	exceptions.AppError
 //	@Router			/tickets [post]
-func (t ticketHandler) CreateTicket(c *gin.Context) {
+func (t *ticketHandler) CreateTicket(c *gin.Context) {
 	validatedModel, exists := c.Get("validatedModel")
 	if !exists {
-		_ = c.Error(e.NewAppError(e.INTERNAL_ERROR, "Cannot find validated model in context", nil))
+		_ = c.Error(e.NewAppError(e.INTERNAL, "Cannot find validated model in context", nil))
 		return
 	}
 	ticketRequest, ok := validatedModel.(*dto.TicketRequest)
 	if !ok {
-		_ = c.Error(e.NewAppError(e.INTERNAL_ERROR, "Cannot cast validated model to TicketRequest", nil))
+		_ = c.Error(e.NewAppError(e.INTERNAL, "Cannot cast validated model to TicketRequest", nil))
 		return
 	}
 
@@ -87,6 +90,8 @@ func (t ticketHandler) CreateTicket(c *gin.Context) {
 	c.JSON(http.StatusCreated, ticket)
 }
 
+// UpdateTicketStatus godoc
+//
 //	@Summary		Update ticket status
 //	@Description	Update the status of a specific ticket
 //	@Tags			tickets
@@ -99,22 +104,22 @@ func (t ticketHandler) CreateTicket(c *gin.Context) {
 //	@Failure		404		{object}	exceptions.AppError
 //	@Failure		500		{object}	exceptions.AppError
 //	@Router			/tickets/{id}/status [put]
-func (t ticketHandler) UpdateTicketStatus(c *gin.Context) {
+func (t *ticketHandler) UpdateTicketStatus(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := strconv.ParseUint(idStr, 10, 32)
 	if err != nil {
-		_ = c.Error(e.NewAppError(e.BAD_REQUEST, "Invalid ticket ID format", err))
+		_ = c.Error(e.NewAppError(e.BadRequest, "Invalid ticket ID format", err))
 		return
 	}
 
 	validatedModel, exists := c.Get("validatedModel")
 	if !exists {
-		_ = c.Error(e.NewAppError(e.INTERNAL_ERROR, "Cannot find validated model in context", nil))
+		_ = c.Error(e.NewAppError(e.INTERNAL, "Cannot find validated model in context", nil))
 		return
 	}
 	statusRequest, ok := validatedModel.(*dto.TicketStatusUpdateRequest)
 	if !ok {
-		_ = c.Error(e.NewAppError(e.INTERNAL_ERROR, "Cannot cast validated model to TicketStatusUpdateRequest", nil))
+		_ = c.Error(e.NewAppError(e.INTERNAL, "Cannot cast validated model to TicketStatusUpdateRequest", nil))
 		return
 	}
 
@@ -126,6 +131,7 @@ func (t ticketHandler) UpdateTicketStatus(c *gin.Context) {
 	c.JSON(http.StatusOK, ticket)
 }
 
+// DeleteTicket godoc
 //	@Summary		Delete a ticket
 //	@Description	Delete a specific ticket by its ID
 //	@Tags			tickets
@@ -136,11 +142,11 @@ func (t ticketHandler) UpdateTicketStatus(c *gin.Context) {
 //	@Failure		404	{object}	exceptions.AppError
 //	@Failure		500	{object}	exceptions.AppError
 //	@Router			/tickets/{id} [delete]
-func (t ticketHandler) DeleteTicket(c *gin.Context) {
+func (t *ticketHandler) DeleteTicket(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := strconv.ParseUint(idStr, 10, 32)
 	if err != nil {
-		_ = c.Error(e.NewAppError(e.BAD_REQUEST, "Invalid ticket ID format", err))
+		_ = c.Error(e.NewAppError(e.BadRequest, "Invalid ticket ID format", err))
 		return
 	}
 
@@ -152,6 +158,7 @@ func (t ticketHandler) DeleteTicket(c *gin.Context) {
 }
 
 // GetTicketStatuses godoc
+//
 //	@Summary		Get all available ticket statuses
 //	@Description	Get a list of all possible ticket statuses
 //	@Tags			tickets
@@ -159,7 +166,7 @@ func (t ticketHandler) DeleteTicket(c *gin.Context) {
 //	@Produce		json
 //	@Success		200	{object}	dto.TicketStatusesResponse
 //	@Router			/tickets/statuses [get]
-func (t ticketHandler) GetTicketStatuses(c *gin.Context) {
+func (t *ticketHandler) GetTicketStatuses(c *gin.Context) {
 	statuses := t.ticketService.GetTicketStatuses()
 	c.JSON(http.StatusOK, dto.TicketStatusesResponse{
 		Statuses: statuses,
@@ -167,6 +174,7 @@ func (t ticketHandler) GetTicketStatuses(c *gin.Context) {
 }
 
 // GetBookingTypes godoc
+//
 //	@Summary		Get all available booking types
 //	@Description	Get a list of all possible booking types
 //	@Tags			tickets
@@ -174,7 +182,7 @@ func (t ticketHandler) GetTicketStatuses(c *gin.Context) {
 //	@Produce		json
 //	@Success		200	{object}	dto.BookingTypesResponse
 //	@Router			/tickets/booking-types [get]
-func (t ticketHandler) GetBookingTypes(c *gin.Context) {
+func (t *ticketHandler) GetBookingTypes(c *gin.Context) {
 	types := t.ticketService.GetBookingTypes()
 	c.JSON(http.StatusOK, dto.BookingTypesResponse{
 		Types: types,

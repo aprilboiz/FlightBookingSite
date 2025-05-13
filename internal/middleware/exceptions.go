@@ -28,7 +28,7 @@ func ErrorHandler(logger *zap.Logger) gin.HandlerFunc {
 				}
 
 				// Convert panic to error response
-				errMsg := fmt.Sprintf("Internal server error: %v", r)
+				errMsg := fmt.Sprintf("InternalError server error: %v", r)
 				response := e.NewErrorResponse(
 					http.StatusInternalServerError,
 					http.StatusText(http.StatusInternalServerError),
@@ -50,7 +50,7 @@ func ErrorHandler(logger *zap.Logger) gin.HandlerFunc {
 				details := appErr.Details
 
 				// Hide details for internal errors
-				if appErr.Code == e.INTERNAL_ERROR {
+				if appErr.Code == e.INTERNAL {
 					details = nil
 				}
 
@@ -66,7 +66,7 @@ func ErrorHandler(logger *zap.Logger) gin.HandlerFunc {
 				// Default to bad request for non-AppError errors
 				response := e.NewErrorResponse(
 					http.StatusBadRequest,
-					e.BAD_REQUEST,
+					e.BadRequest,
 					err.Error(),
 					nil)
 
