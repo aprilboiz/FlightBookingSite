@@ -5,7 +5,7 @@ A web application for searching, booking, and purchasing airplane tickets. This 
 ### Prequisities
 Before you begin, please review the following branches:
 - [backend-go](https://github.com/aprilboiz/FlightBookingSite/tree/backend-go): The main backend server, built with Go using the Gin framework.
-- [front-end-fin](https://github.com/aprilboiz/FlightBookingSite/tree/front-end-fin): The main frontend, built with JavaScript using the React framework.
+- [frontend/nextjs](https://github.com/aprilboiz/FlightBookingSite/tree/frontend/nextjs): The main frontend, built with JavaScript using the React framework.
 - [document-page](https://github.com/aprilboiz/FlightBookingSite/tree/document-page): The documentation branch (currently not being updated).
 
 **NOTE:** This application is divided into two parts: the frontend and the backend. You will need to clone both repositories to your local machine and follow the installation instructions for each part to run the full application.
