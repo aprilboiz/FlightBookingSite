@@ -1,0 +1,25 @@
+environment: development
+
+server:
+  port: 8080
+  host: localhost
+
+database:
+  port: 5432
+  host: localhost 
+  type: postgres
+  user: postgres
+  password: "postgres"
+  name: flight_management
+  timezone: Asia/Ho_Chi_Minh
+  options:
+    max_connections: 10
+    idle_connections: 5
+  init:
+    seed_path: "./pkg/database/seed_data.sql"
+    run_seed: true
+
+logging:
+  level: info
+  format: json
+  output_path: "./logs/app.log"

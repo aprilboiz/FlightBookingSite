@@ -1,0 +1,31 @@
+services:
+  db:
+    image: postgres:latest
+    environment:
+      POSTGRES_DB: flight_management
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    networks:
+      - flight_management-network
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    depends_on:
+      db:
+        condition: service_started
+    restart: unless-stopped
+    networks:
+      - flight_management-network
+
+networks:
+  flight_management-network:
+
+# volumes:
+#   postgres_data:
+#     driver: local

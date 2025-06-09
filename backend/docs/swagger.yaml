@@ -1,0 +1,1048 @@
+basePath: /api
+definitions:
+  dto.AirportResponse:
+    properties:
+      airport_code:
+        type: string
+      airport_name:
+        type: string
+      city_name:
+        type: string
+      country_name:
+        type: string
+    type: object
+  dto.AuthResponse:
+    properties:
+      token:
+        type: string
+      user:
+        $ref: '#/definitions/dto.UserResponse'
+    type: object
+  dto.BookingTypesResponse:
+    properties:
+      types:
+        items:
+          type: string
+        type: array
+    type: object
+  dto.ErrorResponse:
+    properties:
+      details: {}
+      message:
+        type: string
+      status:
+        type: integer
+      type:
+        type: string
+    type: object
+  dto.FlightListResponse:
+    properties:
+      arrival_airport:
+        type: string
+      arrival_city:
+        type: string
+      arrival_country:
+        type: string
+      base_price:
+        type: number
+      booked_seats:
+        type: integer
+      departure_airport:
+        type: string
+      departure_city:
+        type: string
+      departure_country:
+        type: string
+      departure_date_time:
+        type: string
+      duration:
+        type: integer
+      empty_seats:
+        type: integer
+      flight_code:
+        type: string
+      has_stops:
+        type: boolean
+      plane_code:
+        type: string
+      plane_name:
+        type: string
+      stop_count:
+        type: integer
+      total_seats:
+        type: integer
+    type: object
+  dto.FlightRequest:
+    properties:
+      arrival_airport:
+        type: string
+      base_price:
+        type: number
+      departure_airport:
+        type: string
+      departure_date:
+        type: string
+      duration:
+        type: integer
+      intermediate_stops:
+        items:
+          $ref: '#/definitions/dto.IntermediateStopDTO'
+        type: array
+      plane_code:
+        type: string
+    type: object
+  dto.FlightResponse:
+    properties:
+      arrival_airport:
+        type: string
+      base_price:
+        type: number
+      booked_seats:
+        type: integer
+      departure_airport:
+        type: string
+      departure_date_time:
+        type: string
+      duration:
+        type: integer
+      empty_seats:
+        type: integer
+      flight_code:
+        type: string
+      intermediate_stop:
+        items:
+          $ref: '#/definitions/dto.IntermediateStopDTO'
+        type: array
+      plane_code:
+        type: string
+      total_seats:
+        type: integer
+    type: object
+  dto.FlightResponseDetailed:
+    properties:
+      arrival_airport:
+        type: string
+      base_price:
+        type: number
+      booked_seats:
+        type: integer
+      departure_airport:
+        type: string
+      departure_date_time:
+        type: string
+      duration:
+        type: integer
+      empty_seats:
+        type: integer
+      flight_code:
+        type: string
+      intermediate_stop:
+        items:
+          $ref: '#/definitions/dto.IntermediateStopDTO'
+        type: array
+      plane_code:
+        type: string
+      seat_class_info:
+        items:
+          $ref: '#/definitions/dto.SeatClassInfo'
+        type: array
+      seats:
+        items:
+          $ref: '#/definitions/dto.SeatInfo'
+        type: array
+      total_seats:
+        type: integer
+    type: object
+  dto.FlightRevenueReport:
+    properties:
+      flightCode:
+        type: string
+      ratio:
+        description: Ratio of actual revenue to potential revenue
+        type: number
+      revenue:
+        type: number
+      tickets:
+        type: integer
+    type: object
+  dto.IntermediateStopDTO:
+    properties:
+      note:
+        type: string
+      stop_airport:
+        type: string
+      stop_duration:
+        type: integer
+      stop_order:
+        type: integer
+    type: object
+  dto.LoginRequest:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    required:
+    - password
+    - username
+    type: object
+  dto.MonthlyRevenueReport:
+    properties:
+      averageRatio:
+        type: number
+      flights:
+        items:
+          $ref: '#/definitions/dto.FlightRevenueReport'
+        type: array
+      month:
+        description: 'Format: "YYYY-MM"'
+        type: string
+      totalRevenue:
+        type: number
+      totalTickets:
+        type: integer
+    type: object
+  dto.MonthlyRevenueSummary:
+    properties:
+      flightCount:
+        type: integer
+      month:
+        description: 'Format: "YYYY-MM"'
+        type: string
+      ratio:
+        description: Average ratio across all flights
+        type: number
+      revenue:
+        type: number
+    type: object
+  dto.PlaneResponse:
+    properties:
+      plane_code:
+        type: string
+      plane_name:
+        type: string
+    type: object
+  dto.RegisterRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+      username:
+        type: string
+    required:
+    - email
+    - password
+    - username
+    type: object
+  dto.SeatClassInfo:
+    properties:
+      booked_seats:
+        type: integer
+      class_name:
+        type: string
+      empty_seats:
+        type: integer
+      total_seats:
+        type: integer
+    type: object
+  dto.SeatInfo:
+    properties:
+      booked_by:
+        type: string
+      class_name:
+        type: string
+      is_booked:
+        type: boolean
+      price:
+        type: number
+      seat_number:
+        type: string
+    type: object
+  dto.TicketRequest:
+    properties:
+      booking_type:
+        enum:
+        - TICKET
+        - PLACE_ORDER
+        type: string
+      email:
+        type: string
+      flight_code:
+        type: string
+      full_name:
+        type: string
+      id_card:
+        type: string
+      phone_number:
+        type: string
+      seat_number:
+        type: string
+    required:
+    - booking_type
+    - email
+    - flight_code
+    - full_name
+    - id_card
+    - phone_number
+    - seat_number
+    type: object
+  dto.TicketResponse:
+    properties:
+      booking_type:
+        type: string
+      email:
+        type: string
+      flight_code:
+        type: string
+      full_name:
+        type: string
+      id:
+        type: integer
+      id_card:
+        type: string
+      phone_number:
+        type: string
+      price:
+        type: number
+      seat_number:
+        type: string
+      ticket_status:
+        type: string
+    type: object
+  dto.TicketStatusUpdateRequest:
+    properties:
+      status:
+        enum:
+        - ACTIVE
+        - CANCELLED
+        - EXPIRED
+        type: string
+    required:
+    - status
+    type: object
+  dto.TicketStatusesResponse:
+    properties:
+      statuses:
+        items:
+          type: string
+        type: array
+    type: object
+  dto.UserResponse:
+    properties:
+      created_at:
+        type: string
+      email:
+        type: string
+      id:
+        type: integer
+      role:
+        type: string
+      updated_at:
+        type: string
+      username:
+        type: string
+    type: object
+  dto.YearlyRevenueReport:
+    properties:
+      averageRatio:
+        type: number
+      months:
+        items:
+          $ref: '#/definitions/dto.MonthlyRevenueSummary'
+        type: array
+      totalFlights:
+        type: integer
+      totalRevenue:
+        type: number
+      year:
+        description: 'Format: "YYYY"'
+        type: string
+    type: object
+  exceptions.AppError:
+    properties:
+      code:
+        type: string
+      details: {}
+      err: {}
+      message:
+        type: string
+      statusCode:
+        type: integer
+    type: object
+  models.Parameter:
+    properties:
+      latest_ticket_purchase_time:
+        type: integer
+      max_intermediate_stop_duration:
+        type: integer
+      max_intermediate_stops:
+        type: integer
+      max_ticket_classes:
+        type: integer
+      min_flight_duration:
+        type: integer
+      min_intermediate_stop_duration:
+        type: integer
+      number_of_airports:
+        type: integer
+      ticket_cancellation_time:
+        type: integer
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: support@ruaairline.com
+    name: API Support
+    url: http://www.ruaairline.com/support
+  description: API for flight management system
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: Flight Management API
+  version: "1.0"
+paths:
+  /api/airports:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a list of all airports
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/dto.AirportResponse'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Get all airports
+      tags:
+      - airports
+  /api/airports/{code}:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve an airport by its unique code
+      parameters:
+      - description: Airport Code
+        in: path
+        name: code
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.AirportResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Get airport by code
+      tags:
+      - airports
+  /api/flights:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a list of all flights
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/dto.FlightResponse'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Get all flights
+      tags:
+      - flights
+    post:
+      consumes:
+      - application/json
+      description: Create a new flight with the provided information
+      parameters:
+      - description: Flight information
+        in: body
+        name: flight
+        required: true
+        schema:
+          $ref: '#/definitions/dto.FlightRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dto.FlightResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Create a new flight
+      tags:
+      - flights
+  /api/flights/{code}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a flight by its unique code
+      parameters:
+      - description: Flight Code
+        in: path
+        name: code
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Delete a flight
+      tags:
+      - flights
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a flight by its unique code
+      parameters:
+      - description: Flight Code
+        in: path
+        name: code
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.FlightResponseDetailed'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Get flight by code
+      tags:
+      - flights
+    put:
+      consumes:
+      - application/json
+      description: Update an existing flight with the provided information
+      parameters:
+      - description: Flight Code
+        in: path
+        name: code
+        required: true
+        type: string
+      - description: Flight information
+        in: body
+        name: flight
+        required: true
+        schema:
+          $ref: '#/definitions/dto.FlightRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.FlightResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Update a flight
+      tags:
+      - flights
+  /api/flights/list:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a list of all flights with simplified information
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/dto.FlightListResponse'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Get all flights in list format
+      tags:
+      - flights
+  /api/params:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a list of all parameters
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Parameter'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Get all the parameters
+      tags:
+      - parameters
+    put:
+      consumes:
+      - application/json
+      description: Update all parameters
+      parameters:
+      - description: Parameter information
+        in: body
+        name: param
+        required: true
+        schema:
+          $ref: '#/definitions/models.Parameter'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Parameter'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Update parameters
+      tags:
+      - parameters
+  /api/planes:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a list of all planes
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/dto.PlaneResponse'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Get all planes
+      tags:
+      - planes
+  /api/planes/{code}:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a plane by its unique code
+      parameters:
+      - description: Plane Code
+        in: path
+        name: code
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.PlaneResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Get plane by code
+      tags:
+      - planes
+  /api/reports/revenue:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve revenue statistics for flights in a specific month and
+        year
+      parameters:
+      - description: Month (1-12) or leave it blank for current month
+        in: query
+        name: month
+        required: true
+        type: integer
+      - description: Year (e.g., 2024) or leave it blank for current year
+        in: query
+        name: year
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.MonthlyRevenueReport'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Get revenue report
+      tags:
+      - reports
+  /api/reports/revenue/monthly:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve revenue statistics for flights in a specific month
+      parameters:
+      - description: Month (1-12) or leave it blank for current month
+        in: query
+        name: month
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.MonthlyRevenueReport'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Get monthly revenue report
+      tags:
+      - reports
+  /api/reports/revenue/yearly:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve revenue statistics for flights in a specific year
+      parameters:
+      - description: Year (e.g., 2024) or leave it blank for current year
+        in: query
+        name: year
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.YearlyRevenueReport'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Get yearly revenue report
+      tags:
+      - reports
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Login with username and password
+      parameters:
+      - description: User login credentials
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/dto.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.AuthResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Login user
+      tags:
+      - auth
+  /auth/register:
+    post:
+      consumes:
+      - application/json
+      description: Register a new user with username, password, and email
+      parameters:
+      - description: User registration information
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/dto.RegisterRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.AuthResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Register a new user
+      tags:
+      - auth
+  /tickets:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a list of all tickets in the system
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/dto.TicketResponse'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/exceptions.AppError'
+      summary: Get all tickets
+      tags:
+      - tickets
+    post:
+      consumes:
+      - application/json
+      description: Create a new ticket with the provided information
+      parameters:
+      - description: Ticket information
+        in: body
+        name: ticket
+        required: true
+        schema:
+          $ref: '#/definitions/dto.TicketRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dto.TicketResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/exceptions.AppError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/exceptions.AppError'
+      summary: Create a new ticket
+      tags:
+      - tickets
+  /tickets/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a specific ticket by its ID
+      parameters:
+      - description: Ticket ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/exceptions.AppError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/exceptions.AppError'
+      summary: Delete a ticket
+      tags:
+      - tickets
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a specific ticket by its ID
+      parameters:
+      - description: Ticket ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.TicketResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/exceptions.AppError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/exceptions.AppError'
+      summary: Get ticket by ID
+      tags:
+      - tickets
+  /tickets/{id}/status:
+    put:
+      consumes:
+      - application/json
+      description: Update the status of a specific ticket
+      parameters:
+      - description: Ticket ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: New ticket status
+        in: body
+        name: status
+        required: true
+        schema:
+          $ref: '#/definitions/dto.TicketStatusUpdateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.TicketResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/exceptions.AppError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/exceptions.AppError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/exceptions.AppError'
+      summary: Update ticket status
+      tags:
+      - tickets
+  /tickets/booking-types:
+    get:
+      consumes:
+      - application/json
+      description: Get a list of all possible booking types
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.BookingTypesResponse'
+      summary: Get all available booking types
+      tags:
+      - tickets
+  /tickets/statuses:
+    get:
+      consumes:
+      - application/json
+      description: Get a list of all possible ticket statuses
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.TicketStatusesResponse'
+      summary: Get all available ticket statuses
+      tags:
+      - tickets
+schemes:
+- http
+- https
+swagger: "2.0"
